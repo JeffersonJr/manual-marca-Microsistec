@@ -800,15 +800,15 @@ function BrandBook() {
             {/* Business card */}
             <div className="rounded-2xl border border-border bg-card p-10 grid place-items-center">
               <div className="space-y-3">
-                <div className="w-[340px] h-[200px] rounded-lg bg-[#2B5250] text-white p-6 flex flex-col justify-between shadow-xl">
+                <div className="w-full max-w-[340px] h-[200px] rounded-lg bg-[#2B5250] text-white p-6 flex flex-col justify-between shadow-xl">
                   <LogoMark variant="mono-light" withWordmark={false} className="h-10 w-10" />
                   <div>
-                    <div className="font-display font-semibold">Renata Aoki</div>
-                    <div className="text-xs text-white/60">Head of Engineering</div>
-                    <div className="text-[10px] font-mono text-white/50 mt-3">renata@microsistec.com · +55 11 9</div>
+                    <div className="font-display font-semibold">Jefferson Campos</div>
+                    <div className="text-xs text-white/60">Product designer</div>
+                    <div className="text-[10px] font-mono text-white/50 mt-3">jefferson.campos@microsistec.com.br · +55 13 98132-6869</div>
                   </div>
                 </div>
-                <div className="w-[340px] h-[200px] rounded-lg bg-[var(--cream)] text-[#0A1F1E] p-6 flex flex-col justify-between shadow-xl">
+                <div className="w-full max-w-[340px] h-[200px] rounded-lg bg-[var(--cream)] text-[#0A1F1E] p-6 flex flex-col justify-between shadow-xl">
                   <LogoMark variant="deep" className="h-6" />
                   <div className="text-[10px] font-mono text-[#0A1F1E]/60">microsistec.com</div>
                 </div>
@@ -1168,6 +1168,9 @@ function BrandBook() {
               <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
                 T-shirt
               </div>
+              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
+                <LogoMark variant="reverse" withWordmark={false} className="w-5 h-5" />
+              </div>
             </div>
             <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
               <div>
@@ -1196,6 +1199,9 @@ function BrandBook() {
               />
               <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
                 Squeeze
+              </div>
+              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
+                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
               </div>
             </div>
             <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
@@ -1226,6 +1232,9 @@ function BrandBook() {
               <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
                 Notebook
               </div>
+              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
+                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
+              </div>
             </div>
             <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
               <div>
@@ -1255,6 +1264,9 @@ function BrandBook() {
               <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
                 Tote Bag
               </div>
+              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
+                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
+              </div>
             </div>
             <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
               <div>
@@ -1277,17 +1289,17 @@ function BrandBook() {
 
       {/* E-MAIL */}
       <Section id="email" eyebrow="14 · E-mail" title="Assinatura padrão">
-        <div className="rounded-2xl border border-border bg-card p-8 max-w-2xl">
-          <div className="flex gap-5">
-            <div className="shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2B5250] to-[#7CC1C1] grid place-items-center text-white font-display font-semibold text-xl">RA</div>
+        <div className="rounded-2xl border border-border bg-card p-6 md:p-8 max-w-2xl">
+          <div className="flex flex-col sm:flex-row gap-5">
+            <div className="shrink-0 flex sm:block items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2B5250] to-[#7CC1C1] grid place-items-center text-white font-display font-semibold text-xl shadow-inner">JC</div>
             </div>
-            <div className="flex-1 border-l-2 border-[#2B5250] pl-5">
-              <div className="font-display font-semibold text-lg leading-tight">Renata Aoki</div>
-              <div className="text-sm text-muted-foreground">Head of Engineering · Microsistec</div>
+            <div className="flex-1 border-t-2 sm:border-t-0 sm:border-l-2 border-[#2B5250] pt-4 sm:pt-0 pl-0 sm:pl-5">
+              <div className="font-display font-semibold text-lg leading-tight">Jefferson Campos</div>
+              <div className="text-sm text-muted-foreground">Product designer · Microsistec</div>
               <div className="mt-3 text-xs font-mono text-foreground/80 space-y-0.5">
-                <div>renata@microsistec.com</div>
-                <div>+55 11 4002-8922</div>
+                <div>jefferson.campos@microsistec.com.br</div>
+                <div>+55 13 98132-6869</div>
                 <div>microsistec.com</div>
               </div>
               <div className="mt-4 flex items-center gap-2">
@@ -1390,15 +1402,20 @@ $slate: #6B7878;
             },
             {
               t: "Manual Completo",
-              s: "Brand guidelines completas (PDF)",
+              s: "Salvar ou imprimir diretrizes completas",
               e: ".pdf",
               action: () => {
                 toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  new Promise((resolve) => {
+                    setTimeout(() => {
+                      resolve(true);
+                      window.print();
+                    }, 1000);
+                  }),
                   {
-                    loading: "Gerando PDF do Manual de Identidade Visual...",
-                    success: "Manual Completo (PDF) baixado!",
-                    error: "Erro ao exportar PDF."
+                    loading: "Preparando documento para exportação...",
+                    success: "Visualização de impressão aberta! Escolha 'Salvar como PDF'.",
+                    error: "Erro ao abrir visualização."
                   }
                 );
               }
