@@ -1437,7 +1437,7 @@ $slate: #6B7878;
             </div>
           </div>
           <div className="text-xs text-muted-foreground font-mono">
-            brand@microsistec.com
+            jefferson.campos@microsistec.com.br
           </div>
         </div>
       </footer>
