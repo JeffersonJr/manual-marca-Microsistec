@@ -120,27 +120,49 @@
 }
 
 @media print {
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
+  :root, .dark {
+    --background: oklch(0.99 0.005 180) !important;
+    --foreground: oklch(0.18 0.015 200) !important;
+    --card: oklch(1 0 0) !important;
+    --card-foreground: oklch(0.18 0.015 200) !important;
+    --muted: oklch(0.96 0.008 190) !important;
+    --muted-foreground: oklch(0.48 0.02 200) !important;
+    --border: oklch(0.9 0.01 190) !important;
   }
+
+  body {
+    background: var(--background) !important;
+    color: var(--foreground) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   header,
   footer,
   button,
   input,
   .toast,
+  [data-sonner-toaster],
+  .toaster,
   .no-print {
     display: none !important;
   }
+
   section {
     page-break-inside: avoid;
-    page-break-before: always;
+    break-inside: avoid;
     border-top: none !important;
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
   }
+
   svg {
     max-width: 100% !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
