@@ -140,19 +140,23 @@ function BrandBook() {
       localStorage.setItem("theme", "dark");
       toast.success("Modo escuro ativado", {
         description: "Interface adaptada para ambientes de baixa luminosidade.",
+        duration: 3000,
+        position: "top-center",
       });
     } else {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
       toast.success("Modo claro ativado", {
         description: "Interface adaptada para ambientes iluminados.",
+        duration: 3000,
+        position: "top-center",
       });
     }
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative">
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-center" duration={3000} richColors />
       
       {/* Precise Column Grid Overlay */}
       {gridMode && (
@@ -165,13 +169,13 @@ function BrandBook() {
 
       {/* NAV */}
       <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border transition-colors duration-300">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="#top" className="flex items-center gap-2">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <a href="#top" className="flex items-center gap-2 shrink-0">
             <LogoMark withWordmark={false} className="h-8 w-8" />
-            <span className="font-display font-semibold tracking-tight">Microsistec</span>
-            <span className="hidden sm:inline text-xs text-muted-foreground ml-2 font-mono">/ brand v1.0</span>
+            <span className="font-display font-semibold tracking-tight hidden sm:block">Microsistec</span>
+            <span className="hidden md:inline text-xs text-muted-foreground ml-2 font-mono">/ brand v1.0</span>
           </a>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <nav className="hidden lg:flex items-center gap-5 text-sm text-muted-foreground flex-wrap justify-end">
               <a href="#principios" className="hover:text-foreground transition-colors">Princípios</a>
               <a href="#logo" className="hover:text-foreground transition-colors">Logo</a>
@@ -184,13 +188,15 @@ function BrandBook() {
               <a href="#downloads" className="hover:text-foreground transition-colors">Downloads</a>
             </nav>
             <div className="h-4 w-px bg-border hidden lg:block" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {/* Grid Mode Toggle */}
               <button
                 onClick={() => {
                   setGridMode(!gridMode);
                   toast.info(gridMode ? "Grid de alinhamento desativado" : "Grid de alinhamento ativado", {
                     description: gridMode ? "O grid de design foi ocultado." : "O grid geométrico está visível no fundo da página.",
+                    duration: 3000,
+                    position: "top-center",
                   });
                 }}
                 className={`p-2 rounded-lg border transition-all duration-300 hover:bg-muted ${gridMode ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
@@ -218,6 +224,20 @@ function BrandBook() {
               </button>
             </div>
           </div>
+        </div>
+        {/* Mobile Navigation */}
+        <div className="lg:hidden w-full overflow-x-auto border-t border-border/50" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          <nav className="flex items-center gap-5 px-4 sm:px-6 py-3 text-sm text-muted-foreground whitespace-nowrap min-w-max">
+            <a href="#principios" className="hover:text-foreground transition-colors">Princípios</a>
+            <a href="#logo" className="hover:text-foreground transition-colors">Logo</a>
+            <a href="#proporcao" className="hover:text-foreground transition-colors">Proporção</a>
+            <a href="#paleta" className="hover:text-foreground transition-colors">Paleta</a>
+            <a href="#tipografia" className="hover:text-foreground transition-colors">Tipografia</a>
+            <a href="#iconografia" className="hover:text-foreground transition-colors">Ícones</a>
+            <a href="#voz" className="hover:text-foreground transition-colors">Voz</a>
+            <a href="#aplicacoes" className="hover:text-foreground transition-colors">Aplicações</a>
+            <a href="#downloads" className="hover:text-foreground transition-colors">Downloads</a>
+          </nav>
         </div>
       </header>
 
