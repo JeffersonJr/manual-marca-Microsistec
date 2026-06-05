@@ -1156,132 +1156,61 @@ function BrandBook() {
 
       {/* MERCHANDISE */}
       <Section id="merch" eyebrow="13 · Merchandise" title="Marca no físico">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* T-shirt Card */}
-          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-            <div className="aspect-square w-full overflow-hidden bg-muted relative">
-              <img
-                src={tshirtMockup}
-                alt="Camiseta Oficial Microsistec"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
-                T-shirt
-              </div>
-              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
-                <LogoMark variant="reverse" withWordmark={false} className="w-5 h-5" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* T-shirt */}
+          <div className="group rounded-2xl border border-border bg-card p-6 aspect-square flex flex-col justify-between items-center transition-all duration-300 hover:shadow-md">
+            <div className="relative w-full flex-1 flex items-center justify-center">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 bg-[#1B2A2A] rounded-[40%_40%_8%_8%/30%_30%_8%_8%] flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105">
+                <LogoMark variant="reverse" withWordmark={false} className="h-10 w-10 sm:h-12 sm:w-12" />
               </div>
             </div>
-            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
-              <div>
-                <h4 className="font-semibold text-sm text-foreground">Camiseta Oficial</h4>
-                <p className="text-[11px] text-muted-foreground mt-1">Algodão orgânico premium penteado com estampa em silk screen termocolante.</p>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-muted-foreground">PRETO SHADE</span>
-                <button
-                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Camiseta enviados ao time de design." })}
-                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
-                >
-                  Especificações
-                </button>
-              </div>
+            <div className="text-center mt-3">
+              <div className="text-xs font-semibold text-foreground">Camiseta</div>
+              <div className="text-[10px] text-muted-foreground font-mono mt-0.5">Preto Shade</div>
             </div>
           </div>
 
-          {/* Bottle Card */}
-          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-            <div className="aspect-square w-full overflow-hidden bg-muted relative">
-              <img
-                src={bottleMockup}
-                alt="Garrafa Térmica Premium"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
-                Squeeze
-              </div>
-              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
-                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
+          {/* Mug */}
+          <div className="group rounded-2xl border border-border bg-card p-6 aspect-square flex flex-col justify-between items-center transition-all duration-300 hover:shadow-md">
+            <div className="relative w-full flex-1 flex items-center justify-center">
+              <div className="relative transition-transform duration-300 group-hover:scale-105">
+                <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-b-2xl bg-[var(--cream)] border-4 border-[#2B5250] flex items-center justify-center shadow-md">
+                  <LogoMark variant="deep" withWordmark={false} className="h-8 w-8 sm:h-10 sm:w-10" />
+                </div>
+                <div className="absolute right-[-14px] sm:right-[-18px] top-4 sm:top-6 w-5 h-10 sm:w-7 sm:h-12 border-4 border-[#2B5250] rounded-r-full" />
               </div>
             </div>
-            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
-              <div>
-                <h4 className="font-semibold text-sm text-foreground">Garrafa Térmica</h4>
-                <p className="text-[11px] text-muted-foreground mt-1">Aço inoxidável de parede dupla com vácuo e gravação a laser do símbolo.</p>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-muted-foreground">AÇO JATEADO</span>
-                <button
-                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Garrafa enviados ao time de design." })}
-                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
-                >
-                  Especificações
-                </button>
-              </div>
+            <div className="text-center mt-3">
+              <div className="text-xs font-semibold text-foreground">Caneca Oficial</div>
+              <div className="text-[10px] text-muted-foreground font-mono mt-0.5">Cerâmica Cream</div>
             </div>
           </div>
 
-          {/* Notebook Card */}
-          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-            <div className="aspect-square w-full overflow-hidden bg-muted relative">
-              <img
-                src={notebookMockup}
-                alt="Caderno de Anotações Executivo"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
-                Notebook
-              </div>
-              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
-                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
+          {/* Notebook */}
+          <div className="group rounded-2xl border border-border bg-card p-6 aspect-square flex flex-col justify-between items-center transition-all duration-300 hover:shadow-md">
+            <div className="relative w-full flex-1 flex items-center justify-center">
+              <div className="w-20 h-26 sm:w-24 sm:h-32 bg-[#2B5250] shadow-lg p-3 flex flex-col justify-between rounded-r transition-transform duration-300 group-hover:scale-105">
+                <LogoMark variant="mono-light" withWordmark={false} className="h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="text-[8px] font-mono text-white/50">microsistec</div>
               </div>
             </div>
-            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
-              <div>
-                <h4 className="font-semibold text-sm text-foreground">Caderno de Notas</h4>
-                <p className="text-[11px] text-muted-foreground mt-1">Capa dura com textura linho cinza grafite e logo gravado em baixo-relevo cego.</p>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-muted-foreground">TEXTURA LINHO</span>
-                <button
-                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção do Caderno enviados ao time de design." })}
-                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
-                >
-                  Especificações
-                </button>
-              </div>
+            <div className="text-center mt-3">
+              <div className="text-xs font-semibold text-foreground">Caderno de Notas</div>
+              <div className="text-[10px] text-muted-foreground font-mono mt-0.5">Capa Dura Teal</div>
             </div>
           </div>
 
-          {/* Tote Bag Card */}
-          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
-            <div className="aspect-square w-full overflow-hidden bg-muted relative">
-              <img
-                src={totebagMockup}
-                alt="Sacola Ecológica Canvas"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
-                Tote Bag
-              </div>
-              <div className="absolute bottom-3 right-3 bg-background/90 backdrop-blur-sm p-1.5 rounded-full border border-border shadow-sm flex items-center justify-center">
-                <LogoMark variant="deep" withWordmark={false} className="w-5 h-5" />
+          {/* Tote */}
+          <div className="group rounded-2xl border border-border bg-card p-6 aspect-square flex flex-col justify-between items-center transition-all duration-300 hover:shadow-md">
+            <div className="relative w-full flex-1 flex items-center justify-center">
+              <div className="relative w-22 h-26 sm:w-28 sm:h-32 bg-[var(--cream)] border border-[#0A1F1E]/10 flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <LogoMark variant="deep" className="w-16 sm:w-20" />
+                <div className="absolute -top-3 left-2 right-2 h-5 sm:h-6 border-2 border-[#2B5250] rounded-t-full border-b-0" />
               </div>
             </div>
-            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
-              <div>
-                <h4 className="font-semibold text-sm text-foreground">Ecobag Algodão</h4>
-                <p className="text-[11px] text-muted-foreground mt-1">Lona de algodão cru 100% reciclada com estampa silk screen à base de água.</p>
-              </div>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-mono text-muted-foreground">ALGODÃO CRU</span>
-                <button
-                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Ecobag enviados ao time de design." })}
-                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
-                >
-                  Especificações
-                </button>
-              </div>
+            <div className="text-center mt-3">
+              <div className="text-xs font-semibold text-foreground">Sacola Ecológica</div>
+              <div className="text-[10px] text-muted-foreground font-mono mt-0.5">Lona Algodão Cru</div>
             </div>
           </div>
         </div>
