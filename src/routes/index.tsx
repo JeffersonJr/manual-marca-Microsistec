@@ -452,15 +452,19 @@ function BrandBook() {
                     {/* Linhas e retângulos internos que formam a espiral */}
                     <rect x="2" y="63" width="233" height="233" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
                     <rect x="235" y="63" width="144" height="144" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                    <rect x="235" y="207" width="89" height="89" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                    <rect x="324" y="207" width="55" height="55" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                    <rect x="324" y="262" width="34" height="34" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                    <rect x="303" y="262" width="21" height="21" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                    <rect x="303" y="283" width="13" height="13" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="290" y="207" width="89" height="89" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="235" y="241" width="55" height="55" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="235" y="207" width="34" height="34" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="269" y="207" width="21" height="21" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="277" y="228" width="13" height="13" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="269" y="233" width="8" height="8" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="269" y="228" width="5" height="5" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="274" y="228" width="3" height="3" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
+                    <rect x="275" y="231" width="2" height="2" stroke="#5AA6A6" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
 
                     {/* Espiral Dourada Matemologicamente Precisa */}
                     <path
-                      d="M 314 275 A 8 8 0 0 1 316 283 A 13 13 0 0 1 303 283 A 21 21 0 0 1 324 262 A 34 34 0 0 1 358 296 A 55 55 0 0 1 324 207 A 89 89 0 0 1 235 296 A 144 144 0 0 1 379 63 A 233 233 0 0 1 2 63"
+                      d="M 275 231 A 1 1 0 0 1 274 232 A 1 1 0 0 1 275 233 A 2 2 0 0 1 277 231 A 3 3 0 0 1 274 228 A 5 5 0 0 1 269 233 A 8 8 0 0 1 277 241 A 13 13 0 0 1 290 228 A 21 21 0 0 1 269 207 A 34 34 0 0 1 235 241 A 55 55 0 0 1 290 296 A 89 89 0 0 1 379 207 A 144 144 0 0 1 235 63 A 233 233 0 0 1 2 296"
                       stroke="#E8A14B"
                       strokeWidth="2.5"
                       fill="none"
@@ -468,15 +472,16 @@ function BrandBook() {
                     />
                     
                     {/* Ponto focal (Origem) */}
-                    <circle cx="314" cy="275" r="3.5" fill="#E8A14B" className="animate-pulse" />
+                    <circle cx="275" cy="231" r="3.5" fill="#E8A14B" className="animate-pulse" />
                     
                     {/* Relações textuais na tela */}
-                    <text x="110" y="180" fill="#5AA6A6" fontSize="11" fontFamily="monospace" className="font-semibold" opacity="0.8">233</text>
-                    <text x="300" y="140" fill="#5AA6A6" fontSize="10" fontFamily="monospace" className="font-semibold" opacity="0.8">144</text>
-                    <text x="270" y="255" fill="#5AA6A6" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.8">89</text>
-                    <text x="345" y="240" fill="#5AA6A6" fontSize="8" fontFamily="monospace" className="font-semibold" opacity="0.8">55</text>
-                    <text x="338" y="283" fill="#5AA6A6" fontSize="7" fontFamily="monospace" className="font-semibold" opacity="0.8">34</text>
-                    <text x="310" y="275" fill="#5AA6A6" fontSize="6" fontFamily="monospace" className="font-semibold" opacity="0.8">21</text>
+                    <text x="118" y="180" fill="#5AA6A6" fontSize="11" fontFamily="monospace" className="font-semibold" opacity="0.8">233</text>
+                    <text x="300" y="135" fill="#5AA6A6" fontSize="10" fontFamily="monospace" className="font-semibold" opacity="0.8">144</text>
+                    <text x="330" y="250" fill="#5AA6A6" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.8">89</text>
+                    <text x="258" y="270" fill="#5AA6A6" fontSize="8" fontFamily="monospace" className="font-semibold" opacity="0.8">55</text>
+                    <text x="248" y="226" fill="#5AA6A6" fontSize="7" fontFamily="monospace" className="font-semibold" opacity="0.8">34</text>
+                    <text x="277" y="219" fill="#5AA6A6" fontSize="6" fontFamily="monospace" className="font-semibold" opacity="0.8">21</text>
+                    <text x="281" y="236" fill="#5AA6A6" fontSize="5" fontFamily="monospace" className="font-semibold" opacity="0.8">13</text>
                   </g>
                 )}
 
@@ -925,20 +930,35 @@ function BrandBook() {
           </p>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { t: "Macro & Detalhe", img: macroPhoto },
-              { t: "Ambiente Humano", img: humanPhoto },
-              { t: "Arquitetura Digital", img: architecturePhoto },
+              {
+                t: "Macro & Detalhe",
+                desc: "Foco extremo em hardware, conectores e texturas digitais. Transmite precisão cirúrgica, qualidade de engenharia e a essência física da tecnologia.",
+                img: macroPhoto,
+              },
+              {
+                t: "Ambiente Humano",
+                desc: "Colaboração real, equipes de engenharia em ação e interação natural com a tecnologia. Evita stock artificial, priorizando autenticidade e sinergia técnica.",
+                img: humanPhoto,
+              },
+              {
+                t: "Arquitetura Digital",
+                desc: "Simetria de datacenters, alinhamento de servidores e cabeamento estruturado complexo. Comunica robustez, escalabilidade e infraestrutura crítica.",
+                img: architecturePhoto,
+              },
             ].map((p) => (
-              <div key={p.t} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all duration-300">
-                <div className="aspect-[4/5] overflow-hidden bg-muted relative">
-                  <img
-                    src={p.img}
-                    alt={p.t}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4 border-t border-border">
-                  <div className="text-sm font-semibold group-hover:text-primary transition-colors">{p.t}</div>
+              <div key={p.t} className="group rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+                <div>
+                  <div className="aspect-[4/5] overflow-hidden bg-muted relative">
+                    <img
+                      src={p.img}
+                      alt={p.t}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-5 border-t border-border">
+                    <div className="text-base font-semibold group-hover:text-primary transition-colors mb-2">{p.t}</div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+                  </div>
                 </div>
               </div>
             ))}
