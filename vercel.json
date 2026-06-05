@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "dist/client",
   "routes": [
-    { "src": "/(.*)", "dest": "/client/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
