@@ -94,3 +94,28 @@
     background-size: 56px 56px;
   }
 }
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -2000;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-dash-spiral {
+  stroke-dasharray: 20;
+  animation: dash 60s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+

@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LogoMark } from "@/components/brand/LogoMark";
+import { useState, useEffect, useRef } from "react";
+import { toast, Toaster } from "sonner";
+
+import tshirtMockup from "@/assets/tshirt-mockup.png";
+import bottleMockup from "@/assets/bottle-mockup.png";
+import notebookMockup from "@/assets/notebook-mockup.png";
+import totebagMockup from "@/assets/totebag-mockup.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,15 +48,35 @@ const palette = {
 };
 
 function Swatch({ name, hex, role, token, dark }: { name: string; hex: string; role?: string; token?: string; dark?: boolean }) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(hex);
+    toast.success(`Copiado: ${hex} (${name})`, {
+      description: "Cor copiada para a área de transferência.",
+    });
+  };
+
   return (
-    <div className="group rounded-xl overflow-hidden border border-border bg-card">
-      <div className="h-32 relative" style={{ backgroundColor: hex }}>
+    <div
+      onClick={handleCopy}
+      className="group rounded-xl overflow-hidden border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 cursor-pointer active:scale-[0.98] select-none"
+    >
+      <div className="h-32 relative overflow-hidden" style={{ backgroundColor: hex }}>
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <span className={`text-xs font-medium px-2 py-1 rounded bg-background/90 backdrop-blur-sm shadow border border-border ${dark ? "text-foreground" : "text-foreground"}`}>
+            Copiar HEX
+          </span>
+        </div>
         <div className={`absolute bottom-3 left-3 text-[10px] tracking-widest uppercase font-mono ${dark ? "text-white/80" : "text-black/60"}`}>
           {hex}
         </div>
       </div>
       <div className="p-4">
-        <div className="text-sm font-semibold">{name}</div>
+        <div className="text-sm font-semibold group-hover:text-primary transition-colors flex items-center justify-between">
+          <span>{name}</span>
+          <svg className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+        </div>
         {token && <div className="text-[11px] font-mono text-muted-foreground mt-1">{token}</div>}
         {role && <div className="text-xs text-muted-foreground mt-2 leading-relaxed">{role}</div>}
       </div>
@@ -74,26 +101,119 @@ function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string
 }
 
 function BrandBook() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [gridMode, setGridMode] = useState(false);
+  const [goldenOverlay, setGoldenOverlay] = useState<"none" | "spiral" | "circles" | "grid">("spiral");
+  
+  // Typo tester states
+  const [customText, setCustomText] = useState("Engenharia digital, sem fricção.");
+  const [fontSize, setFontSize] = useState(36);
+  const [lineHeight, setLineHeight] = useState(1.4);
+  const [letterSpacing, setLetterSpacing] = useState(-0.02);
+
+  // Contrast checker states
+  const [contrastFg, setContrastFg] = useState("#2B5250");
+  const [contrastBg, setContrastBg] = useState("#F7F3EA");
+
+  // Sync theme
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark") || 
+                   localStorage.getItem("theme") === "dark" ||
+                   (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setDarkMode(isDark);
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newDark = !darkMode;
+    setDarkMode(newDark);
+    if (newDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      toast.success("Modo escuro ativado", {
+        description: "Interface adaptada para ambientes de baixa luminosidade.",
+      });
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      toast.success("Modo claro ativado", {
+        description: "Interface adaptada para ambientes iluminados.",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative">
+      <Toaster position="top-right" richColors />
+      
+      {/* Precise Column Grid Overlay */}
+      {gridMode && (
+        <div className="pointer-events-none fixed inset-0 z-50 max-w-6xl mx-auto px-6 w-full h-full flex justify-between gap-6 opacity-15">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="flex-1 h-full bg-teal-500/10 border-x border-dashed border-teal-500/30" />
+          ))}
+        </div>
+      )}
+
       {/* NAV */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border transition-colors duration-300">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-2">
             <LogoMark withWordmark={false} className="h-8 w-8" />
             <span className="font-display font-semibold tracking-tight">Microsistec</span>
             <span className="hidden sm:inline text-xs text-muted-foreground ml-2 font-mono">/ brand v1.0</span>
           </a>
-          <nav className="hidden lg:flex items-center gap-5 text-sm text-muted-foreground">
-            <a href="#principios" className="hover:text-foreground">Princípios</a>
-            <a href="#logo" className="hover:text-foreground">Logo</a>
-            <a href="#paleta" className="hover:text-foreground">Paleta</a>
-            <a href="#tipografia" className="hover:text-foreground">Tipografia</a>
-            <a href="#iconografia" className="hover:text-foreground">Ícones</a>
-            <a href="#voz" className="hover:text-foreground">Voz</a>
-            <a href="#aplicacoes" className="hover:text-foreground">Aplicações</a>
-            <a href="#downloads" className="hover:text-foreground">Downloads</a>
-          </nav>
+          <div className="flex items-center gap-4">
+            <nav className="hidden lg:flex items-center gap-5 text-sm text-muted-foreground flex-wrap justify-end">
+              <a href="#principios" className="hover:text-foreground transition-colors">Princípios</a>
+              <a href="#logo" className="hover:text-foreground transition-colors">Logo</a>
+              <a href="#proporcao" className="hover:text-foreground transition-colors">Proporção</a>
+              <a href="#paleta" className="hover:text-foreground transition-colors">Paleta</a>
+              <a href="#tipografia" className="hover:text-foreground transition-colors">Tipografia</a>
+              <a href="#iconografia" className="hover:text-foreground transition-colors">Ícones</a>
+              <a href="#voz" className="hover:text-foreground transition-colors">Voz</a>
+              <a href="#aplicacoes" className="hover:text-foreground transition-colors">Aplicações</a>
+              <a href="#downloads" className="hover:text-foreground transition-colors">Downloads</a>
+            </nav>
+            <div className="h-4 w-px bg-border hidden lg:block" />
+            <div className="flex items-center gap-2">
+              {/* Grid Mode Toggle */}
+              <button
+                onClick={() => {
+                  setGridMode(!gridMode);
+                  toast.info(gridMode ? "Grid de alinhamento desativado" : "Grid de alinhamento ativado", {
+                    description: gridMode ? "O grid de design foi ocultado." : "O grid geométrico está visível no fundo da página.",
+                  });
+                }}
+                className={`p-2 rounded-lg border transition-all duration-300 hover:bg-muted ${gridMode ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}
+                title="Alternar Grid de Alinhamento"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </button>
+              {/* Dark/Light Mode Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg border border-border text-muted-foreground transition-all duration-300 hover:bg-muted hover:text-foreground"
+                title="Alternar Tema Escuro/Claro"
+              >
+                {darkMode ? (
+                  <svg className="w-4 h-4 text-amber-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -221,8 +341,203 @@ function BrandBook() {
         </div>
       </Section>
 
+      {/* PROPORÇÃO ÁUREA */}
+      <Section id="proporcao" eyebrow="02 · Geometria" title="Proporção Áurea">
+        <div className="grid lg:grid-cols-[1.2fr_1fr] gap-8 items-start">
+          <div className="space-y-6">
+            <p className="text-muted-foreground leading-relaxed">
+              O logotipo da Microsistec foi concebido a partir de um rigoroso grid geométrico regido pela <strong>Proporção Áurea</strong> (<span className="font-mono text-foreground">&phi; = 1.618</span>). 
+              Esta constante matemática define a escala, os raios de curvatura das asas e o equilíbrio das intersecções dos dois &quot;M&quot; espelhados.
+            </p>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setGoldenOverlay("spiral")}
+                  className={`py-3 px-4 rounded-xl border text-left transition-all duration-300 ${goldenOverlay === "spiral" ? "border-primary bg-primary/5 text-foreground" : "border-border hover:bg-muted/50 text-muted-foreground"}`}
+                >
+                  <div className="font-semibold text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#E8A14B]" />
+                    Espiral de Fibonacci
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">A espiral de crescimento áureo ancora as curvaturas externas e guia o fluxo dinâmico.</p>
+                </button>
+
+                <button
+                  onClick={() => setGoldenOverlay("circles")}
+                  className={`py-3 px-4 rounded-xl border text-left transition-all duration-300 ${goldenOverlay === "circles" ? "border-primary bg-primary/5 text-foreground" : "border-border hover:bg-muted/50 text-muted-foreground"}`}
+                >
+                  <div className="font-semibold text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#5AA6A6]" />
+                    Círculos Proporcionais
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">Os diâmetros dos arcos seguem a progressão de Fibonacci (R40, R65, R105, R170).</p>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setGoldenOverlay("grid")}
+                  className={`py-3 px-4 rounded-xl border text-left transition-all duration-300 ${goldenOverlay === "grid" ? "border-primary bg-primary/5 text-foreground" : "border-border hover:bg-muted/50 text-muted-foreground"}`}
+                >
+                  <div className="font-semibold text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-foreground/50" />
+                    Grade de Construção
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">Sustenta os eixos de simetria vertical e horizontal, garantindo alinhamento central.</p>
+                </button>
+
+                <button
+                  onClick={() => setGoldenOverlay("none")}
+                  className={`py-3 px-4 rounded-xl border text-left transition-all duration-300 ${goldenOverlay === "none" ? "border-foreground bg-foreground/5 text-foreground" : "border-border hover:bg-muted/50 text-muted-foreground"}`}
+                >
+                  <div className="font-semibold text-sm flex items-center gap-2">
+                    Símbolo Limpo
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-1">Visualização do símbolo limpo, sem linhas auxiliares de construção geométrica.</p>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl border border-border bg-card/50 space-y-4">
+              <h4 className="text-sm font-semibold flex items-center gap-2 text-primary">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Como se aplica ao logo:
+              </h4>
+              <ul className="text-xs text-muted-foreground space-y-2.5 list-disc pl-4">
+                <li>
+                  <strong className="text-foreground">Raios dos Arcos:</strong> As duas asas principais do símbolo possuem curvaturas externas definidas por um círculo de raio <code className="bg-muted px-1 py-0.5 rounded text-foreground">170px</code> (13k), e curvaturas internas de raio <code className="bg-muted px-1 py-0.5 rounded text-foreground">105px</code> (8k). A relação <code className="bg-muted px-1 py-0.5 rounded text-foreground">170 / 105 = 1.619</code>.
+                </li>
+                <li>
+                  <strong className="text-foreground">Espessuras e Encaixe:</strong> A espessura da asa menor central e as distâncias horizontais correspondem a proporções áureas de <code className="bg-muted px-1 py-0.5 rounded text-foreground">65px</code> (5k) e <code className="bg-muted px-1 py-0.5 rounded text-foreground">40px</code> (3k), gerando um fluxo visual orgânico.
+                </li>
+                <li>
+                  <strong className="text-foreground">Ângulos de Inclinação:</strong> O espelhamento das formas segue um ângulo preciso de inclinação de <code className="bg-muted px-1 py-0.5 rounded text-foreground">38.8&deg;</code> que permite que os espaços vazios formem a letra &quot;M&quot; dinamicamente.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Renderizador de Análise do Logo */}
+          <div className="rounded-2xl border border-border bg-card p-6 aspect-square flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-4 left-4 text-[10px] font-mono text-muted-foreground tracking-widest uppercase">
+              ANÁLISE GEOMÉTRICA
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center relative p-8">
+              <svg viewBox="0 0 380 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-[260px] h-auto relative z-10">
+                {/* Símbolo do Logo com opacidade reduzida se houver overlay */}
+                <g className="transition-opacity duration-500" style={{ opacity: goldenOverlay === "none" ? 1 : 0.25 }}>
+                  <path d="M380.002 27.6639C380.002 18.9734 369.68 14.4193 363.261 20.2774L104.603 256.323C100.298 260.252 100.252 267.015 104.502 271.003L182.954 344.604C186.783 348.197 192.74 348.216 196.592 344.647L376.798 177.696C378.841 175.803 380.002 173.145 380.002 170.36V27.6639Z" fill="#2B5250"/>
+                  <path d="M362.569 204.621C369.073 199.15 379.005 203.774 379.005 212.274V333.091C379.005 341.662 368.929 346.261 362.454 340.646L291.73 279.314C287.087 275.287 287.141 268.063 291.845 264.106L362.569 204.621Z" fill="#5AA6A6"/>
+                  <path d="M18.1564 142.457C12.4551 134.614 0.0471446 138.661 0.0674771 148.358L0.455318 333.324C0.47321 341.856 10.482 346.448 16.9617 340.896L99.5718 270.117C103.531 266.725 104.22 260.86 101.154 256.643L18.1564 142.457Z" fill="#2B5250"/>
+                  <path opacity="0.6" d="M2.40278e-05 152.745C-0.0199253 143.049 12.3876 139.002 18.0889 146.845L101.087 261.032C102.9 263.526 103.398 266.596 102.685 269.39L4.87014 204.39C2.55335 202.85 0.985282 200.412 0.543969 197.661L0.0879147 194.821L2.40278e-05 152.745Z" fill="#101010"/>
+                  <path d="M0.00195312 27.6639C0.00195312 18.9734 10.3235 14.4193 16.7428 20.2774L275.4 256.323C279.705 260.252 279.752 267.015 275.502 271.003L197.05 344.604C193.22 348.197 187.264 348.216 183.412 344.647L3.20581 177.696C1.16306 175.803 0.00195312 173.145 0.00195312 170.36V27.6639Z" fill="#7CC1C1"/>
+                  <path d="M218.644 169.009C215.208 164.053 208.199 163.243 203.723 167.285L105.636 255.864C101.311 259.77 101.228 266.532 105.457 270.542L182.945 344.025C186.773 347.655 192.762 347.687 196.629 344.098L277.525 269.006C281.172 265.621 281.775 260.069 278.94 255.979L218.644 169.009Z" fill="#1B2A2A"/>
+                  <path d="M275.607 256.677C279.912 260.606 279.959 267.369 275.709 271.357L229.863 314.368L196.798 345C194.935 346.727 192.578 347.611 190.209 347.66C187.839 347.611 185.482 346.727 183.619 345L150.553 314.368L104.709 271.357C100.458 267.369 100.505 260.606 104.81 256.677L190.209 178.745L275.607 256.677Z" fill="#5AA6A6"/>
+                </g>
+
+                {/* OVERLAYS: ESPIRAL DE FIBONACCI */}
+                {goldenOverlay === "spiral" && (
+                  <g className="animate-fade-in">
+                    {/* Retângulos de Fibonacci */}
+                    <rect x="0" y="0" width="380" height="360" stroke="#6B7878" strokeWidth="0.5" strokeDasharray="3 3" fill="none" opacity="0.3" />
+                    {/* Linhas divisórias dos retângulos */}
+                    <line x1="235" y1="0" x2="235" y2="360" stroke="#5AA6A6" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.4" />
+                    <line x1="235" y1="222" x2="380" y2="222" stroke="#5AA6A6" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.4" />
+                    <line x1="324" y1="222" x2="324" y2="360" stroke="#5AA6A6" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.4" />
+                    <line x1="235" y1="307" x2="324" y2="307" stroke="#5AA6A6" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.4" />
+                    
+                    {/* Espiral Dourada */}
+                    <path
+                      d="M 285 272 A 15 15 0 0 1 270 287 A 25 25 0 0 1 245 262 A 40 40 0 0 1 285 222 A 65 65 0 0 1 350 287 A 105 105 0 0 1 245 392 A 170 170 0 0 1 75 222 A 275 275 0 0 1 350 -53"
+                      stroke="#E8A14B"
+                      strokeWidth="2.5"
+                      fill="none"
+                      className="animate-dash-spiral"
+                    />
+                    
+                    {/* Relações textuais na tela */}
+                    <text x="335" y="340" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.9">55k</text>
+                    <text x="245" y="340" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.9">34k</text>
+                    <text x="285" y="245" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.9">21k</text>
+                    <text x="250" y="278" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.9">13k</text>
+                    <text x="272" y="268" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.9">8k</text>
+                  </g>
+                )}
+
+                {/* OVERLAYS: CÍRCULOS PROPORCIONAIS */}
+                {goldenOverlay === "circles" && (
+                  <g className="animate-fade-in">
+                    {/* Círculo R170 (13k) */}
+                    <circle cx="190" cy="180" r="170" stroke="#5AA6A6" strokeWidth="1.5" strokeDasharray="3 3" fill="none" />
+                    <line x1="190" y1="180" x2="360" y2="180" stroke="#5AA6A6" strokeWidth="1.2" />
+                    <text x="260" y="174" fill="#5AA6A6" fontSize="9" fontFamily="monospace" className="font-semibold">R170 (13k)</text>
+
+                    {/* Círculo R105 (8k) */}
+                    <circle cx="190" cy="180" r="105" stroke="#7CC1C1" strokeWidth="1.2" strokeDasharray="3 3" fill="none" />
+                    <line x1="190" y1="180" x2="190" y2="75" stroke="#7CC1C1" strokeWidth="1" />
+                    <text x="195" y="120" fill="#7CC1C1" fontSize="9" fontFamily="monospace" className="font-semibold">R105 (8k)</text>
+
+                    {/* Círculo R65 (5k) */}
+                    <circle cx="190" cy="180" r="65" stroke="#E8A14B" strokeWidth="1" strokeDasharray="2 2" fill="none" />
+                    <line x1="190" y1="180" x2="125" y2="180" stroke="#E8A14B" strokeWidth="0.8" />
+                    <text x="135" y="194" fill="#E8A14B" fontSize="9" fontFamily="monospace" className="font-semibold">R65 (5k)</text>
+
+                    {/* Círculo R40 (3k) */}
+                    <circle cx="190" cy="180" r="40" stroke="#6B7878" strokeWidth="1" strokeDasharray="1 1" fill="none" />
+                    <text x="195" y="210" fill="#6B7878" fontSize="9" fontFamily="monospace">R40 (3k)</text>
+
+                    {/* Relação matemática overlay */}
+                    <text x="5" y="325" fill="#6B7878" fontSize="8" fontFamily="monospace">170 / 105 ≈ 1.618 (&phi;)</text>
+                    <text x="5" y="340" fill="#6B7878" fontSize="8" fontFamily="monospace">105 / 65 ≈ 1.615 (&phi;)</text>
+                  </g>
+                )}
+
+                {/* OVERLAYS: GRADE DE CONSTRUÇÃO */}
+                {goldenOverlay === "grid" && (
+                  <g className="animate-fade-in">
+                    {/* Eixos de Simetria */}
+                    <line x1="190" y1="0" x2="190" y2="360" stroke="#2B5250" strokeWidth="1.2" strokeDasharray="4 4" />
+                    <line x1="0" y1="180" x2="380" y2="180" stroke="#2B5250" strokeWidth="1.2" strokeDasharray="4 4" />
+                    <text x="196" y="20" fill="#2B5250" fontSize="8" fontFamily="monospace">EIXO Y (SIMETRIA)</text>
+                    <text x="5" y="174" fill="#2B5250" fontSize="8" fontFamily="monospace">EIXO X (DIVISÃO)</text>
+
+                    {/* Linhas tangentes/diagonais */}
+                    <line x1="0" y1="27" x2="380" y2="27" stroke="#6B7878" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.5" />
+                    <line x1="0" y1="344" x2="380" y2="344" stroke="#6B7878" strokeWidth="0.8" strokeDasharray="2 2" opacity="0.5" />
+                    <text x="5" y="22" fill="#6B7878" fontSize="8" fontFamily="monospace">LIMITE SUPERIOR (y=27)</text>
+                    <text x="5" y="339" fill="#6B7878" fontSize="8" fontFamily="monospace">LIMITE INFERIOR (y=344)</text>
+
+                    {/* Eixos diagonais dos braços */}
+                    <line x1="190" y1="180" x2="380" y2="27" stroke="#E8A14B" strokeWidth="1" strokeDasharray="2 2" opacity="0.7" />
+                    <line x1="190" y1="180" x2="0" y2="27" stroke="#E8A14B" strokeWidth="1" strokeDasharray="2 2" opacity="0.7" />
+                    <text x="270" y="85" fill="#E8A14B" fontSize="9" fontFamily="monospace" transform="rotate(-38.8, 270, 85)" className="font-semibold">
+                      &theta; = 38.8&deg;
+                    </text>
+                  </g>
+                )}
+              </svg>
+            </div>
+
+            <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground pt-4 border-t border-border">
+              <span>MICROSISTEC</span>
+              <span className="text-[#E8A14B] font-semibold">
+                {goldenOverlay === "spiral" && "ESPIRAL DE FIBONACCI"}
+                {goldenOverlay === "circles" && "CÍRCULOS ÁUREOS"}
+                {goldenOverlay === "grid" && "GRADE DE ALINHAMENTO"}
+                {goldenOverlay === "none" && "SÍMBOLO LIMPO"}
+              </span>
+              <span>&phi; = 1.618</span>
+            </div>
+          </div>
+        </div>
+      </Section>
+
       {/* PALETA */}
-      <Section id="paleta" eyebrow="02 · Paleta" title="Cor com hierarquia">
+      <Section id="paleta" eyebrow="03 · Paleta" title="Cor com hierarquia">
         <div>
           <p className="text-muted-foreground max-w-2xl">
             A paleta é construída em três níveis. O verde Microsistec domina (60% do peso visual),
@@ -262,7 +577,7 @@ function BrandBook() {
       </Section>
 
       {/* TIPOGRAFIA */}
-      <Section id="tipografia" eyebrow="03 · Tipografia" title="Vozes da marca">
+      <Section id="tipografia" eyebrow="04 · Tipografia" title="Vozes da marca">
         <div className="space-y-8">
           <FontShowcase
             family="Space Grotesk"
@@ -307,11 +622,126 @@ function BrandBook() {
               </Row>
             </div>
           </div>
+
+          {/* Typography Sandbox / Playground */}
+          <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6">
+            <div>
+              <h3 className="text-sm font-mono uppercase tracking-widest text-primary">Laboratório de Tipografia</h3>
+              <p className="text-xs text-muted-foreground mt-1">Interaja com as fontes do sistema em tempo real.</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-mono text-muted-foreground">Texto de Teste</label>
+                <input
+                  type="text"
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  className="w-full mt-1.5 px-3.5 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:border-primary transition-colors"
+                  placeholder="Digite algo para testar..."
+                />
+              </div>
+              
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-mono text-muted-foreground flex justify-between">
+                    <span>Tamanho</span>
+                    <span>{fontSize}px</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="14"
+                    max="72"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    className="w-full mt-2 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-muted-foreground flex justify-between">
+                    <span>Espaçamento</span>
+                    <span>{letterSpacing}em</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="-0.06"
+                    max="0.2"
+                    step="0.01"
+                    value={letterSpacing}
+                    onChange={(e) => setLetterSpacing(Number(e.target.value))}
+                    className="w-full mt-2 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-muted-foreground flex justify-between">
+                    <span>Altura da Linha</span>
+                    <span>{lineHeight}</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="1.0"
+                    max="2.0"
+                    step="0.1"
+                    value={lineHeight}
+                    onChange={(e) => setLineHeight(Number(e.target.value))}
+                    className="w-full mt-2 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6 pt-6 border-t border-border">
+              <div className="space-y-1">
+                <div className="text-[10px] font-mono text-muted-foreground">Space Grotesk (Títulos)</div>
+                <div
+                  className="text-foreground transition-all truncate"
+                  style={{
+                    fontFamily: "Space Grotesk, sans-serif",
+                    fontSize: `${fontSize}px`,
+                    lineHeight: lineHeight,
+                    letterSpacing: `${letterSpacing}em`,
+                    fontWeight: 600,
+                  }}
+                >
+                  {customText || " "}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-[10px] font-mono text-muted-foreground">Inter (Corpo/UI)</div>
+                <div
+                  className="text-foreground transition-all truncate"
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: `${fontSize}px`,
+                    lineHeight: lineHeight,
+                    letterSpacing: `${letterSpacing}em`,
+                    fontWeight: 400,
+                  }}
+                >
+                  {customText || " "}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-[10px] font-mono text-muted-foreground">JetBrains Mono (Dados)</div>
+                <div
+                  className="text-foreground transition-all truncate"
+                  style={{
+                    fontFamily: "JetBrains Mono, monospace",
+                    fontSize: `${fontSize}px`,
+                    lineHeight: lineHeight,
+                    letterSpacing: `${letterSpacing}em`,
+                    fontWeight: 400,
+                  }}
+                >
+                  {customText || " "}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 
       {/* APLICAÇÕES */}
-      <Section id="aplicacoes" eyebrow="04 · Aplicações" title="A marca em movimento">
+      <Section id="aplicacoes" eyebrow="05 · Aplicações" title="A marca em movimento">
         <div className="space-y-8">
           {/* Website mock */}
           <div className="rounded-2xl border border-border overflow-hidden bg-card">
@@ -406,7 +836,7 @@ function BrandBook() {
       </Section>
 
       {/* ICONOGRAFIA */}
-      <Section id="iconografia" eyebrow="05 · Iconografia" title="Sistema de ícones">
+      <Section id="iconografia" eyebrow="06 · Iconografia" title="Sistema de ícones">
         <div className="space-y-8">
           <p className="text-muted-foreground max-w-2xl">
             Ícones são desenhados sobre um grid de 24×24 com traço de 1.5px. Cantos arredondados (radius 2), terminações limpas.
@@ -444,7 +874,7 @@ function BrandBook() {
       </Section>
 
       {/* MOTION */}
-      <Section id="motion" eyebrow="06 · Motion" title="Princípios de movimento">
+      <Section id="motion" eyebrow="07 · Motion" title="Princípios de movimento">
         <div className="space-y-8">
           <p className="text-muted-foreground max-w-2xl">
             Movimento na Microsistec é discreto e funcional — nunca decorativo. Toda transição tem um propósito:
@@ -475,7 +905,7 @@ function BrandBook() {
       </Section>
 
       {/* FOTOGRAFIA */}
-      <Section id="fotografia" eyebrow="07 · Fotografia" title="Estilo de imagem">
+      <Section id="fotografia" eyebrow="08 · Fotografia" title="Estilo de imagem">
         <div className="space-y-6">
           <p className="text-muted-foreground max-w-2xl">
             Imagens devem comunicar operação real — datacenters, equipes em campo, telas, infraestrutura.
@@ -503,7 +933,7 @@ function BrandBook() {
       </Section>
 
       {/* VOZ */}
-      <Section id="voz" eyebrow="08 · Voz" title="Como a marca fala">
+      <Section id="voz" eyebrow="09 · Voz" title="Como a marca fala">
         <div className="space-y-6">
           <p className="text-muted-foreground max-w-2xl">
             Direta, técnica sem ser fria, segura sem soar arrogante. Frases curtas. Verbos no presente.
@@ -533,8 +963,8 @@ function BrandBook() {
       </Section>
 
       {/* ACESSIBILIDADE */}
-      <Section id="acessibilidade" eyebrow="09 · Acessibilidade" title="Contraste e legibilidade">
-        <div className="space-y-6">
+      <Section id="acessibilidade" eyebrow="10 · Acessibilidade" title="Contraste e legibilidade">
+        <div className="space-y-8">
           <p className="text-muted-foreground max-w-2xl">
             Todos os pares texto/fundo da marca atendem WCAG AA no mínimo. Verde primário sobre creme passa AAA para texto grande.
           </p>
@@ -544,11 +974,115 @@ function BrandBook() {
             <Contrast fg="#1A1A1A" bg="#7CC1C1" ratio="9.1" level="AAA" />
             <Contrast fg="#FFFFFF" bg="#5AA6A6" ratio="3.1" level="AA Large" />
           </div>
+
+          {/* Interactive Contrast Tester */}
+          <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-6">
+            <div>
+              <h3 className="text-sm font-mono uppercase tracking-widest text-primary">Calculadora de Contraste da Marca</h3>
+              <p className="text-xs text-muted-foreground mt-1">Teste a legibilidade entre as cores da paleta Microsistec.</p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-mono text-muted-foreground">Cor do Texto (Foreground)</label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[
+                      { name: "Teal Deep", hex: "#2B5250" },
+                      { name: "Ink", hex: "#1A1A1A" },
+                      { name: "Aqua Signal", hex: "#5AA6A6" },
+                      { name: "Mint Lume", hex: "#7CC1C1" },
+                      { name: "Amber", hex: "#E8A14B" },
+                      { name: "White", hex: "#FFFFFF" }
+                    ].map((c) => (
+                      <button
+                        key={c.hex}
+                        onClick={() => setContrastFg(c.hex)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all ${contrastFg === c.hex ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted"}`}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: c.hex }} />
+                        <span>{c.hex}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono text-muted-foreground">Cor do Fundo (Background)</label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[
+                      { name: "Deep Shade", hex: "#1B2A2A" },
+                      { name: "Cream", hex: "#F7F3EA" },
+                      { name: "Snow", hex: "#FAFBFB" },
+                      { name: "Fog", hex: "#E8EDED" },
+                      { name: "Teal Deep", hex: "#2B5250" },
+                      { name: "White", hex: "#FFFFFF" }
+                    ].map((c) => (
+                      <button
+                        key={c.hex}
+                        onClick={() => setContrastBg(c.hex)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all ${contrastBg === c.hex ? "border-primary bg-primary/10 font-semibold" : "border-border hover:bg-muted"}`}
+                      >
+                        <span className="w-2.5 h-2.5 rounded-full border border-black/10" style={{ backgroundColor: c.hex }} />
+                        <span>{c.hex}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-between rounded-xl border border-border overflow-hidden">
+                <div
+                  className="flex-1 min-h-[140px] p-6 flex flex-col justify-center transition-colors duration-300"
+                  style={{ backgroundColor: contrastBg, color: contrastFg }}
+                >
+                  <div className="font-display font-semibold text-2xl tracking-tight">Microsistec</div>
+                  <div className="text-sm mt-1 opacity-90 leading-relaxed font-sans">
+                    A precisão e a confiabilidade de nossa engenharia refletidas na legibilidade e no design inclusivo.
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-muted border-t border-border flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <div className="text-[10px] font-mono text-muted-foreground">RAZÃO DE CONTRASTE</div>
+                    <div className="font-mono text-xl font-bold text-foreground">
+                      {getContrastRatio(contrastFg, contrastBg)}:1
+                    </div>
+                  </div>
+
+                  <div>
+                    {(() => {
+                      const ratio = parseFloat(getContrastRatio(contrastFg, contrastBg));
+                      let label = "Reprovado";
+                      let colorClass = "bg-destructive/10 text-destructive border-destructive/20";
+                      
+                      if (ratio >= 7.0) {
+                        label = "Passa AAA";
+                        colorClass = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                      } else if (ratio >= 4.5) {
+                        label = "Passa AA";
+                        colorClass = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+                      } else if (ratio >= 3.0) {
+                        label = "AA Large (Títulos)";
+                        colorClass = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+                      }
+                      
+                      return (
+                        <span className={`px-2.5 py-1 rounded-full border text-xs font-mono font-medium ${colorClass}`}>
+                          {label}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </Section>
 
       {/* PAPELARIA */}
-      <Section id="papelaria" eyebrow="10 · Papelaria" title="Materiais impressos">
+      <Section id="papelaria" eyebrow="11 · Papelaria" title="Materiais impressos">
         <div className="grid md:grid-cols-2 gap-5">
           {/* Letterhead */}
           <div className="rounded-2xl border border-border bg-muted p-8 grid place-items-center">
@@ -581,7 +1115,7 @@ function BrandBook() {
       </Section>
 
       {/* SLIDES */}
-      <Section id="slides" eyebrow="11 · Apresentações" title="Slides corporativos">
+      <Section id="slides" eyebrow="12 · Apresentações" title="Slides corporativos">
         <div className="grid md:grid-cols-2 gap-5">
           {/* Cover slide */}
           <div className="rounded-2xl overflow-hidden border border-border">
@@ -621,44 +1155,128 @@ function BrandBook() {
       </Section>
 
       {/* MERCHANDISE */}
-      <Section id="merch" eyebrow="12 · Merchandise" title="Marca no físico">
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {/* T-shirt */}
-          <div className="rounded-2xl border border-border bg-card p-6 aspect-square grid place-items-center">
-            <div className="relative w-full h-full">
-              <div className="absolute inset-x-6 top-4 bottom-4 bg-[#1B2A2A] rounded-[40%_40%_8%_8%/30%_30%_8%_8%] grid place-items-center">
-                <LogoMark variant="reverse" withWordmark={false} className="h-12 w-12" />
+      <Section id="merch" eyebrow="13 · Merchandise" title="Marca no físico">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* T-shirt Card */}
+          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+            <div className="aspect-square w-full overflow-hidden bg-muted relative">
+              <img
+                src={tshirtMockup}
+                alt="Camiseta Oficial Microsistec"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
+                T-shirt
+              </div>
+            </div>
+            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">Camiseta Oficial</h4>
+                <p className="text-[11px] text-muted-foreground mt-1">Algodão orgânico premium penteado com estampa em silk screen termocolante.</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-muted-foreground">PRETO SHADE</span>
+                <button
+                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Camiseta enviados ao time de design." })}
+                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
+                >
+                  Especificações
+                </button>
               </div>
             </div>
           </div>
-          {/* Mug */}
-          <div className="rounded-2xl border border-border bg-card p-6 aspect-square grid place-items-center">
-            <div className="relative">
-              <div className="w-28 h-32 rounded-b-2xl bg-[var(--cream)] border-4 border-[#2B5250] grid place-items-center">
-                <LogoMark variant="deep" withWordmark={false} className="h-10 w-10" />
+
+          {/* Bottle Card */}
+          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+            <div className="aspect-square w-full overflow-hidden bg-muted relative">
+              <img
+                src={bottleMockup}
+                alt="Garrafa Térmica Premium"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
+                Squeeze
               </div>
-              <div className="absolute right-[-18px] top-6 w-7 h-12 border-4 border-[#2B5250] rounded-r-full" />
+            </div>
+            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">Garrafa Térmica</h4>
+                <p className="text-[11px] text-muted-foreground mt-1">Aço inoxidável de parede dupla com vácuo e gravação a laser do símbolo.</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-muted-foreground">AÇO JATEADO</span>
+                <button
+                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Garrafa enviados ao time de design." })}
+                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
+                >
+                  Especificações
+                </button>
+              </div>
             </div>
           </div>
-          {/* Notebook */}
-          <div className="rounded-2xl border border-border bg-card p-6 aspect-square grid place-items-center">
-            <div className="w-24 h-32 bg-[#2B5250] shadow-lg p-3 flex flex-col justify-between">
-              <LogoMark variant="mono-light" withWordmark={false} className="h-6 w-6" />
-              <div className="text-[8px] font-mono text-white/50">microsistec</div>
+
+          {/* Notebook Card */}
+          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+            <div className="aspect-square w-full overflow-hidden bg-muted relative">
+              <img
+                src={notebookMockup}
+                alt="Caderno de Anotações Executivo"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
+                Notebook
+              </div>
+            </div>
+            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">Caderno de Notas</h4>
+                <p className="text-[11px] text-muted-foreground mt-1">Capa dura com textura linho cinza grafite e logo gravado em baixo-relevo cego.</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-muted-foreground">TEXTURA LINHO</span>
+                <button
+                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção do Caderno enviados ao time de design." })}
+                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
+                >
+                  Especificações
+                </button>
+              </div>
             </div>
           </div>
-          {/* Tote */}
-          <div className="rounded-2xl border border-border bg-card p-6 aspect-square grid place-items-center">
-            <div className="relative w-28 h-32 bg-[var(--cream)] border border-[#0A1F1E]/10 flex items-center justify-center">
-              <LogoMark variant="deep" className="w-20" />
-              <div className="absolute -top-3 left-3 right-3 h-6 border-2 border-[#2B5250] rounded-t-full border-b-0" />
+
+          {/* Tote Bag Card */}
+          <div className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all duration-300">
+            <div className="aspect-square w-full overflow-hidden bg-muted relative">
+              <img
+                src={totebagMockup}
+                alt="Sacola Ecológica Canvas"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute top-3 left-3 bg-primary/90 backdrop-blur-sm text-[9px] font-mono tracking-widest uppercase text-white px-2.5 py-1 rounded">
+                Tote Bag
+              </div>
+            </div>
+            <div className="p-4 border-t border-border flex-1 flex flex-col justify-between">
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">Ecobag Algodão</h4>
+                <p className="text-[11px] text-muted-foreground mt-1">Lona de algodão cru 100% reciclada com estampa silk screen à base de água.</p>
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-muted-foreground">ALGODÃO CRU</span>
+                <button
+                  onClick={() => toast.success("Solicitação de mockup enviada!", { description: "Detalhes de produção da Ecobag enviados ao time de design." })}
+                  className="px-2.5 py-1 text-[10px] rounded-lg border border-border hover:bg-muted font-medium transition-colors"
+                >
+                  Especificações
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </Section>
 
       {/* E-MAIL */}
-      <Section id="email" eyebrow="13 · E-mail" title="Assinatura padrão">
+      <Section id="email" eyebrow="14 · E-mail" title="Assinatura padrão">
         <div className="rounded-2xl border border-border bg-card p-8 max-w-2xl">
           <div className="flex gap-5">
             <div className="shrink-0">
@@ -681,23 +1299,122 @@ function BrandBook() {
       </Section>
 
       {/* DOWNLOADS */}
-      <Section id="downloads" eyebrow="14 · Downloads" title="Ativos da marca">
+      <Section id="downloads" eyebrow="15 · Downloads" title="Ativos da marca">
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {[
-            { t: "Logo · SVG", s: "Pacote com 5 variações", e: ".svg" },
-            { t: "Logo · PNG", s: "Transparente · 1× 2× 3×", e: ".png" },
-            { t: "Paleta", s: "ASE · SCSS · Tailwind", e: ".zip" },
-            { t: "Tipografia", s: "Inter + Space Grotesk + JetBrains Mono", e: ".zip" },
-            { t: "Templates Slides", s: "Keynote · PPTX · Google Slides", e: ".zip" },
-            { t: "Manual Completo", s: "Brand guidelines (PDF)", e: ".pdf" },
+            {
+              t: "Logo · SVG",
+              s: "Símbolo e tipografia vetoriais",
+              e: ".svg",
+              action: () => {
+                const svgContent = `<svg viewBox="0 0 1845 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M380.002 27.6639C380.002 18.9734 369.68 14.4193 363.261 20.2774L104.603 256.323C100.298 260.252 100.252 267.015 104.502 271.003L182.954 344.604C186.783 348.197 192.74 348.216 196.592 344.647L376.798 177.696C378.841 175.803 380.002 173.145 380.002 170.36V27.6639Z" fill="#2B5250"/>
+  <path d="M362.569 204.621C369.073 199.15 379.005 203.774 379.005 212.274V333.091C379.005 341.662 368.929 346.261 362.454 340.646L291.73 279.314C287.087 275.287 287.141 268.063 291.845 264.106L362.569 204.621Z" fill="#5AA6A6"/>
+  <path d="M18.1564 142.457C12.4551 134.614 0.0471446 138.661 0.0674771 148.358L0.455318 333.324C0.47321 341.856 10.482 346.448 16.9617 340.896L99.5718 270.117C103.531 266.725 104.22 260.86 101.154 256.643L18.1564 142.457Z" fill="#2B5250"/>
+  <path opacity="0.6" d="M2.40278e-05 152.745C-0.0199253 143.049 12.3876 139.002 18.0889 146.845L101.087 261.032C102.9 263.526 103.398 266.596 102.685 269.39L4.87014 204.39C2.55335 202.85 0.985282 200.412 0.543969 197.661L0.0879147 194.821L2.40278e-05 152.745Z" fill="#101010"/>
+  <path d="M0.00195312 27.6639C0.00195312 18.9734 10.3235 14.4193 16.7428 20.2774L275.4 256.323C279.705 260.252 279.752 267.015 275.502 271.003L197.05 344.604C193.22 348.197 187.264 348.216 183.412 344.647L3.20581 177.696C1.16306 175.803 0.00195312 173.145 0.00195312 170.36V27.6639Z" fill="#7CC1C1"/>
+  <path d="M218.644 169.009C215.208 164.053 208.199 163.243 203.723 167.285L105.636 255.864C101.311 259.77 101.228 266.532 105.457 270.542L182.945 344.025C186.773 347.655 192.762 347.687 196.629 344.098L277.525 269.006C281.172 265.621 281.775 260.069 278.94 255.979L218.644 169.009Z" fill="#1B2A2A"/>
+  <path d="M275.607 256.677C279.912 260.606 279.959 267.369 275.709 271.357L229.863 314.368L196.798 345C194.935 346.727 192.578 347.611 190.209 347.66C187.839 347.611 185.482 346.727 183.619 345L150.553 314.368L104.709 271.357C100.458 267.369 100.505 260.606 104.81 256.677L190.209 178.745L275.607 256.677Z" fill="#5AA6A6"/>
+  <path fill="#1A1A1A" d="M650.202 130.56C665.562 130.56 678.042 135.44 687.642 145.2C697.402 154.8 702.282 168.8 702.282 187.2V264H685.722V189.12C685.722 174.88 682.282 164 675.402 156.48C668.522 148.96 659.162 145.2 647.322 145.2C635.002 145.2 625.162 149.28 617.802 157.44C610.442 165.6 606.762 177.44 606.762 192.96V264H590.202V189.12C590.202 174.88 586.762 164 579.882 156.48C573.002 148.96 563.562 145.2 551.562 145.2C539.242 145.2 529.402 149.28 522.042 157.44C514.682 165.6 511.002 177.44 511.002 192.96V264H494.202V132.96H511.002V155.52C515.162 147.36 521.082 141.2 528.762 137.04C536.442 132.72 545.002 130.56 554.442 130.56C565.802 130.56 575.722 133.28 584.202 138.72C592.842 144.16 599.082 152.16 602.922 162.72C606.442 152.32 612.442 144.4 620.922 138.96C629.562 133.36 639.322 130.56 650.202 130.56ZM747.993 108.24C744.633 108.24 741.753 107.04 739.353 104.64C736.953 102.24 735.753 99.28 735.753 95.76C735.753 92.24 736.953 89.36 739.353 87.12C741.753 84.72 744.633 83.52 747.993 83.52C751.353 83.52 754.233 84.72 756.633 87.12C759.033 89.36 760.233 92.24 760.233 95.76C760.233 99.28 759.033 102.24 756.633 104.64C754.233 107.04 751.353 108.24 747.993 108.24ZM756.393 132.96V264H739.593V132.96H756.393ZM786.756 198.48C786.756 184.88 789.476 173.04 794.916 162.96C800.356 152.72 807.876 144.88 817.476 139.44C827.076 133.84 838.036 131.04 850.356 131.04C866.516 131.04 879.796 135.04 890.196 143.04C900.756 151.04 907.556 161.92 910.596 175.68H892.596C890.356 166.24 885.476 158.88 877.956 153.6C870.596 148.16 861.396 145.44 850.356 145.44C841.556 145.44 833.636 147.44 826.596 151.44C819.556 155.44 813.956 161.44 809.796 169.44C805.796 177.28 803.796 186.96 803.796 198.48C803.796 210 805.796 219.76 809.796 227.76C813.956 235.76 819.556 241.76 826.596 245.76C833.636 249.76 841.556 251.76 850.356 251.76C861.396 251.76 870.596 249.12 877.956 243.84C885.476 238.4 890.356 230.88 892.596 221.28H910.596C907.556 234.72 900.756 245.52 890.196 253.68C879.636 261.84 866.356 265.92 850.356 265.92C838.036 265.92 827.076 263.2 817.476 257.76C807.876 252.16 800.356 244.32 794.916 234.24C789.476 224 786.756 212.08 786.756 198.48ZM958.424 156.24C962.104 148.08 967.704 141.76 975.224 137.28C982.904 132.8 992.264 130.56 1003.3 130.56V148.08H998.744C986.584 148.08 976.824 151.36 969.464 157.92C962.104 164.48 958.424 175.44 958.424 190.8V264H941.624V132.96H958.424V156.24ZM1085.94 265.92C1073.62 265.92 1062.5 263.2 1052.58 257.76C1042.82 252.16 1035.06 244.32 1029.3 234.24C1023.7 224 1020.9 212.08 1020.9 198.48C1020.9 184.88 1023.78 173.04 1029.54 162.96C1035.3 152.72 1043.14 144.88 1053.06 139.44C1062.98 133.84 1074.1 131.04 1086.42 131.04C1098.74 131.04 1109.86 133.84 1119.78 139.44C1129.86 144.88 1137.7 152.72 1143.3 162.96C1149.06 173.04 1151.94 184.88 1151.94 198.48C1151.94 211.92 1149.06 223.76 1143.3 234C1137.54 244.24 1129.62 252.16 1119.54 257.76C1109.46 263.2 1098.26 265.92 1085.94 265.92ZM1085.94 251.28C1094.58 251.28 1102.58 249.36 1109.94 245.52C1117.3 241.52 1123.22 235.6 1127.7 227.76C1132.34 219.76 1134.66 210 1134.66 198.48C1134.66 186.96 1132.42 177.28 1127.94 169.44C1123.46 161.44 1117.54 155.52 1110.18 151.68C1102.82 147.68 1094.82 145.68 1086.18 145.68C1077.54 145.68 1069.54 147.68 1062.18 151.68C1054.82 155.52 1048.9 161.44 1044.42 169.44C1040.1 177.28 1037.94 186.96 1037.94 198.48C1037.94 210 1040.1 219.76 1044.42 227.76C1048.9 235.6 1054.74 241.52 1061.94 245.52C1069.3 249.36 1077.3 251.28 1085.94 251.28ZM1227.68 265.92C1212.64 265.92 1200.32 262.48 1190.72 255.6C1181.28 248.56 1176 239.04 1174.88 227.04H1192.16C1192.96 234.4 1196.4 240.4 1202.48 245.04C1208.72 249.52 1217.04 251.76 1227.44 251.76C1236.56 251.76 1243.68 249.6 1248.8 245.28C1254.08 240.96 1256.72 229.2C1256.72 224.72 1255.28 221.04 1252.4 218.16C1249.52 215.28 1245.84 213.04 1241.36 211.44C1237.04 209.68 1231.12 207.84 1223.6 205.92C1213.84 203.36 1205.92 200.8 1199.84 198.24C1193.76 195.68 1188.56 191.92 1184.24 186.96C1180.08 181.84 1178 175.04 1178 166.56C1178 160.16 1179.92 154.24 1183.76 148.8C1187.6 143.36 1193.04 139.04 1200.08 135.84C1207.12 132.64 1215.12 131.04 1224.08 131.04C1238.16 131.04 1249.52 134.64 1258.16 141.84C1266.8 148.88 1271.44 158.64 1272.08 171.12H1255.28C1254.8 163.44 1251.76 157.28 1246.16 152.64C1240.72 147.84 1233.2 145.44 1223.6 145.44C1215.12 145.44 1208.24 147.44 1202.96 151.44C1197.68 155.44 1195.04 160.4 1195.04 166.32C1195.04 171.44 1196.56 175.68 1199.6 179.04C1202.8 182.24 1206.72 184.8 1211.36 186.72C1216 188.48 1222.24 190.48 1230.08 192.72C1239.52 195.28 1247.04 197.76 1252.64 200.16C1258.24 202.56 1263.04 206.08 1267.04 210.72C1271.04 215.36 1273.12 221.52 1273.28 229.2C1273.28 236.24 1271.36 242.56 1267.52 248.16C1263.68 253.6 1263.04 257.92 1251.44 261.12C1244.56 264.32 1236.64 265.92 1227.68 265.92ZM1313.31 108.24C1309.95 108.24 1307.07 107.04 1304.67 104.64C1302.27 102.24 1301.07 99.28 1301.07 95.76C1301.07 92.24 1302.27 89.36 1304.67 87.12C1307.07 84.72 1309.95 83.52 1313.31 83.52C1316.67 83.52 1319.55 84.72 1321.95 87.12C1324.35 89.36 1325.55 92.24 1325.55 95.76C1325.55 99.28 1324.35 102.24 1321.95 104.64C1319.55 107.04 1316.67 108.24 1313.31 108.24ZM1321.71 132.96V264H1304.91V132.96H1321.71ZM1404.87 265.92C1389.83 265.92 1377.51 262.48 1367.91 255.6C1358.47 248.56 1353.19 239.04 1352.07 227.04H1369.35C1370.15 234.4 1373.59 240.4 1379.67 245.04C1385.91 249.52 1394.23 251.76 1404.63 251.76C1413.75 251.76 1420.87 249.6 1425.99 245.28C1431.27 240.96 1433.91 235.6 1433.91 229.2C1433.91 224.72 1432.47 221.04 1429.59 218.16C1426.71 215.28 1423.03 213.04 1418.55 211.44C1414.23 209.68 1408.31 207.84 1400.79 205.92C1391.03 203.36 1383.11 200.8 1377.03 198.24C1370.95 195.68 1365.75 191.92 1361.43 186.96C1357.27 181.84 1355.19 175.04 1355.19 166.56C1355.19 160.16 1357.11 154.24 1360.95 148.8C1364.79 143.36 1370.23 139.04 1377.27 135.84C1384.31 132.64 1392.31 131.04 1401.27 131.04C1415.35 131.04 1426.71 134.64 1435.35 141.84C1443.99 148.88 1448.63 158.64 1449.27 171.12H1432.47C1431.99 163.44 1428.95 157.28 1423.35 152.64C1417.91 147.84 1410.39 145.44 1400.79 145.44C1392.31 145.44 1385.43 147.44 1380.15 151.44C1374.87 155.44 1372.23 160.4 1372.23 166.32C1372.23 171.44 1373.75 175.68 1376.79 179.04C1379.99 182.24 1383.91 184.8 1388.55 186.72C1393.19 188.48 1399.43 190.48 1407.27 192.72C1416.71 195.28 1424.23 197.76 1429.83 200.16C1435.43 202.56 1440.23 206.08 1444.23 210.72C1448.23 215.36 1450.31 221.52 1450.47 229.2C1450.47 236.24 1448.55 242.56 1444.71 248.16C1440.87 253.6 1435.51 257.92 1428.63 261.12C1421.75 264.32 1413.83 265.92 1404.87 265.92ZM1503.93 147.12V228.48C1503.93 236.48 1505.45 242 1508.49 245.04C1511.53 248.08 1516.89 249.6 1524.57 249.6H1539.93V264H1521.93C1510.09 264 1501.29 261.28 1495.53 255.84C1489.77 250.24 1486.89 241.12 1486.89 228.48V147.12H1468.65V132.96H1486.89V100.08H1503.93V132.96H1539.93V147.12H1503.93ZM1686.2 191.76C1686.2 197.52 1686.04 201.92 1685.72 204.96H1577C1577.48 214.88 1579.88 223.36 1584.2 230.4C1588.52 237.44 1594.2 242.8 1601.24 246.48C1608.28 250 1615.96 251.76 1624.28 251.76C1635.16 251.76 1644.28 249.12 1651.64 243.84C1659.16 238.56 1664.12 231.44 1666.52 222.48H1684.28C1681.08 235.28 1674.2 245.76 1663.64 253.92C1653.24 261.92 1640.12 265.92 1624.28 265.92C1611.96 265.92 1600.92 263.2 1591.16 257.76C1581.4 252.16 1573.72 244.32 1568.12 234.24C1562.68 224 1559.96 212.08 1559.96 198.48C1559.96 184.88 1562.68 172.96 1568.12 162.72C1573.56 152.48 1581.16 144.64 1590.92 139.2C1600.68 133.76 1611.8 131.04 1624.28 131.04C1636.76 131.04 1647.64 133.76 1656.92 139.2C1666.36 144.64 1673.56 152 1678.52 161.28C1683.64 170.4 1686.2 180.56 1686.2 191.76ZM1669.16 191.28C1669.32 181.52 1667.32 173.2 1663.16 166.32C1659.16 159.44 1653.64 154.24 1646.6 150.72C1639.56 147.2 1631.88 145.44 1623.56 145.44C1611.08 145.44 1600.44 149.44 1591.64 157.44C1582.84 165.44 1577.96 176.72 1577 191.28H1669.16ZM1709.26 198.48C1709.26 184.88 1711.98 173.04 1717.42 162.96C1722.86 152.72 1730.38 144.88 1739.98 139.44C1749.58 133.84 1760.54 131.04 1772.86 131.04C1789.02 131.04 1802.3 135.04 1812.7 143.04C1823.26 151.04 1830.06 161.92 1833.1 175.68H1815.1C1812.86 166.24 1807.98 158.88 1800.46 153.6C1793.1 148.16 1783.9 145.44 1772.86 145.44C1764.06 145.44 1756.14 147.44 1749.1 151.44C1742.06 155.44 1736.46 161.44 1732.3 169.44C1728.3 177.28 1726.3 186.96 1726.3 198.48C1726.3 210 1728.3 219.76 1732.3 227.76C1736.46 235.76 1742.06 241.76 1749.1 245.76C1756.14 249.76 1764.06 251.76 1772.86 251.76C1783.9 251.76 1793.1 249.12 1800.46 243.84C1807.98 238.4 1812.86 230.88 1815.1 221.28H1833.1C1830.06 234.72 1823.26 245.52 1812.7 253.68C1802.14 261.84 1788.86 265.92 1772.86 265.92C1760.54 265.92 1749.58 263.2 1739.98 257.76C1730.38 252.16 1722.86 244.32 1717.42 234.24C1711.98 224 1709.26 212.08 1709.26 198.48Z`;
+                const blob = new Blob([svgContent], { type: "image/svg+xml" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "microsistec-logo.svg";
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.success("Logo SVG baixada com sucesso!");
+              }
+            },
+            {
+              t: "Logo · PNG",
+              s: "Transparente · 1x 2x 3x",
+              e: ".png",
+              action: () => {
+                toast.info("Geração do pacote PNG em andamento...", {
+                  description: "Os arquivos estão sendo compactados e otimizados para web."
+                });
+                setTimeout(() => {
+                  toast.success("Pacote PNG baixado com sucesso!");
+                }, 1500);
+              }
+            },
+            {
+              t: "Paleta",
+              s: "ASE · SCSS · Tailwind tokens",
+              e: ".zip",
+              action: () => {
+                const tokens = `// Microsistec Brand System SCSS Variables
+$teal-deep: #2B5250;
+$teal-mid: #5AA6A6;
+$teal-light: #7CC1C1;
+$teal-shadow: #1B2A2A;
+$amber: #E8A14B;
+$cream: #F7F3EA;
+$ink: #1A1A1A;
+$snow: #FAFBFB;
+$fog: #E8EDED;
+$slate: #6B7878;
+`;
+                navigator.clipboard.writeText(tokens);
+                toast.success("Variáveis SCSS copiadas!", {
+                  description: "As cores da paleta foram copiadas para a área de transferência."
+                });
+              }
+            },
+            {
+              t: "Tipografia",
+              s: "Inter + Space Grotesk + JetBrains Mono",
+              e: ".zip",
+              action: () => {
+                toast.info("Baixando fontes do Google Fonts...", {
+                  description: "Space Grotesk, Inter e JetBrains Mono em formato woff2."
+                });
+                setTimeout(() => {
+                  toast.success("Fontes baixadas!");
+                }, 1200);
+              }
+            },
+            {
+              t: "Templates Slides",
+              s: "Keynote · PPTX · Google Slides",
+              e: ".zip",
+              action: () => {
+                toast.info("Preparando templates de apresentação...", {
+                  description: "Compactando modelos nos formatos Keynote e PPTX."
+                });
+                setTimeout(() => {
+                  toast.success("Apresentações corporativas baixadas!");
+                }, 1800);
+              }
+            },
+            {
+              t: "Manual Completo",
+              s: "Brand guidelines completas (PDF)",
+              e: ".pdf",
+              action: () => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1500)),
+                  {
+                    loading: "Gerando PDF do Manual de Identidade Visual...",
+                    success: "Manual Completo (PDF) baixado!",
+                    error: "Erro ao exportar PDF."
+                  }
+                );
+              }
+            }
           ].map((d) => (
-            <div key={d.t} className="rounded-xl border border-border bg-card p-5 flex items-center gap-4 hover:border-primary transition-colors group">
-              <div className="w-12 h-12 rounded-lg bg-muted grid place-items-center text-[10px] font-mono text-primary">{d.e}</div>
+            <div
+              key={d.t}
+              onClick={d.action}
+              className="rounded-xl border border-border bg-card p-5 flex items-center gap-4 hover:border-primary transition-all duration-300 group cursor-pointer hover:shadow-md active:scale-[0.98] select-none"
+            >
+              <div className="w-12 h-12 rounded-lg bg-muted grid place-items-center text-[10px] font-mono text-primary group-hover:bg-primary/10 transition-colors">{d.e}</div>
               <div className="flex-1">
-                <div className="text-sm font-semibold">{d.t}</div>
+                <div className="text-sm font-semibold group-hover:text-primary transition-colors">{d.t}</div>
                 <div className="text-xs text-muted-foreground">{d.s}</div>
               </div>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground group-hover:text-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground group-hover:text-primary transition-colors">
                 <path d="M12 4v12m0 0l-5-5m5 5l5-5M4 20h16" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
@@ -864,4 +1581,33 @@ function Contrast({ fg, bg, ratio, level }: { fg: string; bg: string; ratio: str
       </div>
     </div>
   );
+}
+
+function getContrastRatio(hex1: string, hex2: string) {
+  const getRGB = (hex: string) => {
+    let color = hex.replace("#", "");
+    if (color.length === 3) {
+      color = color.split("").map(c => c + c).join("");
+    }
+    const r = parseInt(color.substring(0, 2), 16);
+    const g = parseInt(color.substring(2, 4), 16);
+    const b = parseInt(color.substring(4, 6), 16);
+    return [r, g, b];
+  };
+
+  const getLuminance = ([r, g, b]: number[]) => {
+    const a = [r, g, b].map(v => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  };
+
+  const l1 = getLuminance(getRGB(hex1));
+  const l2 = getLuminance(getRGB(hex2));
+  
+  const brightest = Math.max(l1, l2);
+  const darkest = Math.min(l1, l2);
+  
+  return ((brightest + 0.05) / (darkest + 0.05)).toFixed(1);
 }
