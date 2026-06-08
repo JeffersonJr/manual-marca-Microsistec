@@ -1760,7 +1760,7 @@ function BrandBookRoute() {
                     {(() => {
                       const ratio = parseFloat(getContrastRatio(contrastFg, contrastBg));
                       let label = "Reprovado";
-                      let colorClass = "bg-red-600 text-white font-bold border-transparent shadow-sm";
+                      let colorClass = "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
                       
                       if (ratio >= 7.0) {
                         label = "Passa AAA";
