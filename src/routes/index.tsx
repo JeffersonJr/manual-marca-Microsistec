@@ -2,8 +2,8 @@
  * Criado e desenvolvido por Evolves Tecnologia (Jefferson Campos)
  */
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
-import { Plus, Settings, Palette, Eye, ArrowRight, ArrowLeft, Upload, X, Check, Download, FileUp } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Plus, Settings, Palette, Eye, ArrowRight, ArrowLeft, Upload, X, Check, Download, FileUp, CloudUpload } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { DynamicLogoMark } from "@/components/brand/DynamicLogoMark";
 
@@ -97,17 +97,45 @@ function Dashboard() {
   const [secondaryColor, setSecondaryColor] = useState("#06b6d4");
   const [accentColor, setAccentColor] = useState("#f59e0b");
 
-  useEffect(() => {
-    const stored = localStorage.getItem("custom_brands");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setBrands([defaultMicrosistec, ...parsed]);
-      } catch (e) {
-        console.error(e);
-      }
+  const serverBrandsRef = useRef<Brand[]>([]);
+
+  // Merge server brands (public/custom-brands.json) with localStorage overrides
+  const getMergedBrands = useCallback((): Brand[] => {
+    const localStored = localStorage.getItem("custom_brands");
+    const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
+
+    let localBrands: Brand[] = [];
+    if (localStored) {
+      try { localBrands = JSON.parse(localStored); } catch { /* ignore */ }
     }
+
+    // Merge: start with server brands, overlay with localStorage
+    const map = new Map<string, Brand>();
+    for (const b of serverBrandsRef.current) {
+      if (!deletedIds.includes(b.id)) map.set(b.id, b);
+    }
+    for (const b of localBrands) {
+      if (!deletedIds.includes(b.id)) map.set(b.id, b);
+    }
+
+    return Array.from(map.values());
   }, []);
+
+  // Load brands from server + localStorage
+  useEffect(() => {
+    fetch("/custom-brands.json")
+      .then(r => r.ok ? r.json() : [])
+      .then((serverBrands: Brand[]) => {
+        serverBrandsRef.current = serverBrands;
+        const merged = getMergedBrands();
+        setBrands([defaultMicrosistec, ...merged]);
+      })
+      .catch(() => {
+        // Fallback to localStorage only
+        const merged = getMergedBrands();
+        setBrands([defaultMicrosistec, ...merged]);
+      });
+  }, [getMergedBrands]);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -206,20 +234,15 @@ function Dashboard() {
       },
     };
 
-    const stored = localStorage.getItem("custom_brands");
-    let currentCustom: Brand[] = [];
-    if (stored) {
-      try {
-        currentCustom = JSON.parse(stored);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    // Add or replace
-    const filtered = currentCustom.filter(b => b.id !== newBrandId);
+    // Save to localStorage (immediate) — will persist to deploy via Sync
+    const currentMerged = getMergedBrands();
+    const filtered = currentMerged.filter(b => b.id !== newBrandId);
     const updated = [...filtered, newBrand];
     localStorage.setItem("custom_brands", JSON.stringify(updated));
+
+    // Remove from deleted list if it was previously deleted
+    const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
+    localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== newBrandId)));
 
     setBrands([defaultMicrosistec, ...updated]);
     toast.success("Manual de Marca gerado com sucesso!");
@@ -263,10 +286,8 @@ function Dashboard() {
     const dragId = e.dataTransfer.getData("text/plain");
     if (!dragId || dragId === targetId || dragId === "microsistec") return;
 
-    const stored = localStorage.getItem("custom_brands");
-    if (!stored) return;
     try {
-      const customBrands: Brand[] = JSON.parse(stored);
+      const customBrands = getMergedBrands();
       const draggedIndex = customBrands.findIndex(b => b.id === dragId);
       const targetIndex = customBrands.findIndex(b => b.id === targetId);
       if (draggedIndex === -1 || targetIndex === -1) return;
@@ -330,21 +351,20 @@ function Dashboard() {
           return;
         }
 
-        const stored = localStorage.getItem("custom_brands");
-        let currentCustom: Brand[] = [];
-        if (stored) {
-          try { currentCustom = JSON.parse(stored); } catch { /* ignore */ }
-        }
-
-        const existingIndex = currentCustom.findIndex(b => b.id === brandData.id);
+        const currentMerged = getMergedBrands();
+        const existingIndex = currentMerged.findIndex(b => b.id === brandData.id);
         if (existingIndex >= 0) {
-          currentCustom[existingIndex] = brandData as Brand;
+          currentMerged[existingIndex] = brandData as Brand;
         } else {
-          currentCustom.push(brandData as Brand);
+          currentMerged.push(brandData as Brand);
         }
 
-        localStorage.setItem("custom_brands", JSON.stringify(currentCustom));
-        setBrands([defaultMicrosistec, ...currentCustom]);
+        // Remove from deleted list if previously deleted
+        const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
+        localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== brandData.id)));
+
+        localStorage.setItem("custom_brands", JSON.stringify(currentMerged));
+        setBrands([defaultMicrosistec, ...currentMerged]);
         toast.success(`Manual "${brandData.name}" importado com sucesso!`);
       } catch {
         toast.error("Erro ao ler o arquivo. Verifique se é um JSON válido.");
@@ -354,6 +374,19 @@ function Dashboard() {
 
     // Reset input so re-importing the same file works
     e.target.value = "";
+  };
+
+  // Download current merged brands as custom-brands.json for deployment
+  const handleSyncForDeploy = () => {
+    const merged = getMergedBrands();
+    const blob = new Blob([JSON.stringify(merged, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "custom-brands.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Arquivo baixado! Substitua public/custom-brands.json, commit e deploy.", { duration: 6000 });
   };
 
   // Sync theme
@@ -433,6 +466,16 @@ function Dashboard() {
                 className="hidden"
               />
             </label>
+
+            {/* Sync for Deploy */}
+            <button
+              onClick={handleSyncForDeploy}
+              className="inline-flex items-center gap-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 px-3 py-2.5 text-sm font-medium transition-all duration-300"
+              title="Baixar custom-brands.json para deploy permanente"
+            >
+              <CloudUpload className="w-4 h-4" />
+              <span className="hidden sm:inline">Sincronizar</span>
+            </button>
 
             <button
               onClick={() => setShowModal(true)}

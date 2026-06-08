@@ -645,20 +645,29 @@ function BrandBookRoute() {
 
   const handleDeleteBrand = () => {
     if (!brand) return;
-    const stored = localStorage.getItem("custom_brands");
-    if (stored) {
-      try {
+    try {
+      // Remove from localStorage brands
+      const stored = localStorage.getItem("custom_brands");
+      if (stored) {
         const brands: BrandData[] = JSON.parse(stored);
         const filtered = brands.filter(b => b.id !== brand.id);
         localStorage.setItem("custom_brands", JSON.stringify(filtered));
-        toast.success("Manual de Marca excluído com sucesso!");
-        setShowDeleteModal(false);
-        setShowEditModal(false);
-        router.navigate({ to: "/" });
-      } catch (err) {
-        console.error(err);
-        toast.error("Erro ao excluir o manual.");
       }
+
+      // Track as deleted (so server brands are also hidden)
+      const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
+      if (!deletedIds.includes(brand.id)) {
+        deletedIds.push(brand.id);
+        localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds));
+      }
+
+      toast.success("Manual de Marca excluído com sucesso!");
+      setShowDeleteModal(false);
+      setShowEditModal(false);
+      router.navigate({ to: "/" });
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao excluir o manual.");
     }
   };
 
@@ -794,28 +803,46 @@ function BrandBookRoute() {
   const [contrastBg, setContrastBg] = useState("#F7F3EA");
 
   useEffect(() => {
-    const stored = localStorage.getItem("custom_brands");
-    let found: BrandData | undefined;
-    if (stored) {
+    // Fetch server brands and merge with localStorage
+    const loadBrand = async () => {
+      let serverBrands: BrandData[] = [];
       try {
-        const brands: BrandData[] = JSON.parse(stored);
-        found = brands.find(b => b.id === brandId);
-      } catch (e) {
-        console.error(e);
-      }
-    }
+        const resp = await fetch("/custom-brands.json");
+        if (resp.ok) serverBrands = await resp.json();
+      } catch { /* fetch failed, use localStorage only */ }
 
-    if (found) {
-      setBrand(found);
-      setContrastFg(found.palette.primary[0].hex);
-      setContrastBg(found.palette.accent[1]?.hex || found.palette.neutrals[0].hex);
-    } else if (brandId === "microsistec") {
-      setBrand(defaultMicrosistec);
-      setContrastFg(defaultMicrosistec.palette.primary[0].hex);
-      setContrastBg(defaultMicrosistec.palette.accent[1].hex);
-    } else {
-      setBrand(defaultMicrosistec);
-    }
+      const localStored = localStorage.getItem("custom_brands");
+      const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
+
+      let localBrands: BrandData[] = [];
+      if (localStored) {
+        try { localBrands = JSON.parse(localStored); } catch { /* ignore */ }
+      }
+
+      // Merge: server first, localStorage overlays
+      const map = new Map<string, BrandData>();
+      for (const b of serverBrands) {
+        if (!deletedIds.includes(b.id)) map.set(b.id, b);
+      }
+      for (const b of localBrands) {
+        if (!deletedIds.includes(b.id)) map.set(b.id, b);
+      }
+
+      const found = map.get(brandId);
+
+      if (found) {
+        setBrand(found);
+        setContrastFg(found.palette.primary[0].hex);
+        setContrastBg(found.palette.accent[1]?.hex || found.palette.neutrals[0].hex);
+      } else if (brandId === "microsistec") {
+        setBrand(defaultMicrosistec);
+        setContrastFg(defaultMicrosistec.palette.primary[0].hex);
+        setContrastBg(defaultMicrosistec.palette.accent[1].hex);
+      } else {
+        setBrand(defaultMicrosistec);
+      }
+    };
+    loadBrand();
   }, [brandId]);
 
   // Sync theme
