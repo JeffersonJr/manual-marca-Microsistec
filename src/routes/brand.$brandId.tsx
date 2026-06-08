@@ -46,6 +46,7 @@ interface BrandData {
   mission: string;
   vision: string;
   promise: string;
+  customDomain?: string;
   values: { name: string; description: string }[];
   palette: {
     primary: { name: string; hex: string; role: string; token: string }[];
@@ -608,10 +609,11 @@ function BrandBookRoute() {
     } else {
       toast.loading("Gerando versão de logotipo...", { id: "logo-download" });
       try {
-        const base64Filtered = await getFilteredLogoBase64(brand.logoUrl, variant === 'deep' ? 'original' : (variant as any));
+        const logoSource = (!withWordmark && brand.symbolUrl) ? brand.symbolUrl : brand.logoUrl;
+        const base64Filtered = await getFilteredLogoBase64(logoSource, variant === 'deep' ? 'original' : (variant as any));
         const a = document.createElement("a");
         a.href = base64Filtered;
-        a.download = `${brand.id}-logo-${nameSuffix}.png`;
+        a.download = `${brand.id}-${withWordmark ? "logo" : "simbolo"}-${nameSuffix}.png`;
         a.click();
         toast.success(`Logo ${nameSuffix} baixada com sucesso!`, { id: "logo-download" });
       } catch (err) {
@@ -623,7 +625,7 @@ function BrandBookRoute() {
   const [darkMode, setDarkMode] = useState(false);
   const [gridMode, setGridMode] = useState(false);
   const [goldenOverlay, setGoldenOverlay] = useState<"none" | "spiral" | "circles" | "grid">("spiral");
-
+  const [printOrientation, setPrintOrientation] = useState<'portrait' | 'landscape'>('portrait');
   // Edit modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [editBrandName, setEditBrandName] = useState("");
@@ -638,6 +640,7 @@ function BrandBookRoute() {
   const [editPrimaryColor, setEditPrimaryColor] = useState("#4f46e5");
   const [editSecondaryColor, setEditSecondaryColor] = useState("#06b6d4");
   const [editAccentColor, setEditAccentColor] = useState("#f59e0b");
+  const [editCustomDomain, setEditCustomDomain] = useState("");
 
   // Delete modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -685,6 +688,7 @@ function BrandBookRoute() {
     setEditPrimaryColor(brand.palette.primary[0]?.hex || "#4f46e5");
     setEditSecondaryColor(brand.palette.secondary[0]?.hex || "#06b6d4");
     setEditAccentColor(brand.palette.accent[0]?.hex || "#f59e0b");
+    setEditCustomDomain(brand.customDomain || "");
     setShowEditModal(true);
   };
 
@@ -751,6 +755,7 @@ function BrandBookRoute() {
       mission: editMission,
       vision: editVision,
       promise: editPromise,
+      customDomain: editCustomDomain.trim() || undefined,
       palette: {
         primary: [
           { name: `${editBrandName} Principal`, hex: editPrimaryColor, role: "Cor principal da identidade da marca.", token: "--color-brand-primary" },
@@ -891,6 +896,52 @@ function BrandBookRoute() {
       ["--cream" as any]: brand.palette.accent[1]?.hex || "#F7F3EA",
     }}>
       <Toaster position="top-center" duration={3000} richColors />
+
+      {/* Dynamic PDF printing styles */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            size: ${printOrientation};
+            margin: 15mm;
+          }
+          header, footer, button, nav, .no-print, [role="tooltip"], .toaster, [id^="toast-"] {
+            display: none !important;
+          }
+          body {
+            background: white !important;
+            color: black !important;
+            font-size: 12px !important;
+          }
+          main, .max-w-6xl {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+          section {
+            page-break-before: always !important;
+            break-before: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            border-top: none !important;
+            padding-top: 15px !important;
+            padding-bottom: 15px !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+          h1, h2, h3, h4, h5, h6, p, span, div, td, strong, a {
+            color: #000000 !important;
+          }
+          .grid, .flex {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .rounded-xl, .rounded-2xl {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+        }
+      `}} />
       
       {/* Grid Overlay */}
       {gridMode && (
@@ -1105,7 +1156,7 @@ function BrandBookRoute() {
         <div className="grid lg:grid-cols-[1.2fr_1fr] gap-8 items-start">
           <div className="space-y-6">
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              O logotipo da Microsistec foi concebido a partir de um rigoroso grid geométrico regido pela <strong>Proporção Áurea</strong> (<span className="font-mono text-foreground">&phi; = 1.618</span>). Esta constante matemática define a escala, os raios de curvatura das asas e o equilíbrio das intersecções dos dois &quot;M&quot; espelhados.
+              O logotipo da {brand.name} foi concebido a partir de um rigoroso grid geométrico regido pela <strong>Proporção Áurea</strong> (<span className="font-mono text-foreground">&phi; = 1.618</span>). Esta constante matemática define a escala, as curvaturas e o equilíbrio de todas as proporções da identidade visual.
             </p>
             
             <div className="space-y-4">
@@ -1163,13 +1214,13 @@ function BrandBookRoute() {
               </h4>
               <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-4">
                 <li>
-                  <strong className="text-foreground">Raios dos Arcos:</strong> Curvatura externa de raio 170px (13k) e interna de 105px (8k). Relação áurea.
+                  <strong className="text-foreground">Proporção Dinâmica:</strong> O dimensionamento segue a sequência de Fibonacci para garantir equilíbrio.
                 </li>
                 <li>
-                  <strong className="text-foreground">Espessuras:</strong> Espessura central correspondente a 65px (5k) e 40px (3k) gerando fluxo orgânico.
+                  <strong className="text-foreground">Harmonia Visual:</strong> As curvaturas externas e internas estão em perfeita relação áurea (&phi;).
                 </li>
                 <li>
-                  <strong className="text-foreground">Inclinação:</strong> Ângulo preciso de 38.8° permitindo que os vazios definam as letras.
+                  <strong className="text-foreground">Eixos de Simetria:</strong> O posicionamento respeita eixos verticais e horizontais precisos.
                 </li>
               </ul>
             </div>
@@ -1181,66 +1232,17 @@ function BrandBookRoute() {
             </div>
             
             <div className="flex-1 flex items-center justify-center relative p-4 sm:p-8 min-h-[300px]">
-              {/* Logo Layer */}
-              <div 
-                className="transition-opacity duration-500 flex items-center justify-center w-full max-w-[260px] aspect-square relative z-10" 
-                style={{ opacity: goldenOverlay === "none" ? 1 : 0.22 }}
-              >
+              <div className="w-full max-w-[260px] flex items-center justify-center">
                 <DynamicLogoMark 
                   logoUrl={brand.logoUrl} 
                   symbolUrl={brand.symbolUrl}
                   brandName={brand.name} 
                   variant="original" 
                   withWordmark={false} 
-                  className="w-full h-full max-w-full max-h-full object-contain" 
+                  className="w-full h-auto max-h-[260px]" 
+                  goldenOverlay={goldenOverlay}
                 />
               </div>
-
-              {/* Overlays Layer */}
-              {goldenOverlay !== "none" && (
-                <svg viewBox="0 0 380 360" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute w-full max-w-[260px] h-auto z-20 pointer-events-none animate-fade-in">
-                  {goldenOverlay === "spiral" && (
-                    <g>
-                      <rect x="2" y="63" width="377" height="233" stroke="#6B7878" strokeWidth="0.8" fill="none" opacity="0.4" />
-                      <rect x="2" y="63" width="233" height="233" stroke="var(--primary)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                      <rect x="235" y="63" width="144" height="144" stroke="var(--primary)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                      <rect x="290" y="207" width="89" height="89" stroke="var(--primary)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                      <rect x="235" y="241" width="55" height="55" stroke="var(--primary)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                      <rect x="235" y="207" width="34" height="34" stroke="var(--primary)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" opacity="0.5" />
-                      <path
-                        d="M 275 231 A 1 1 0 0 1 274 232 A 1 1 0 0 1 275 233 A 2 2 0 0 1 277 231 A 3 3 0 0 1 274 228 A 5 5 0 0 1 269 233 A 8 8 0 0 1 277 241 A 13 13 0 0 1 290 228 A 21 21 0 0 1 269 207 A 34 34 0 0 1 235 241 A 55 55 0 0 1 290 296 A 89 89 0 0 1 379 207 A 144 144 0 0 1 235 63 A 233 233 0 0 1 2 296"
-                        stroke="#E8A14B"
-                        strokeWidth="2.5"
-                        fill="none"
-                        className="animate-dash-spiral"
-                      />
-                      <circle cx="275" cy="231" r="3.5" fill="#E8A14B" />
-                      <text x="118" y="180" fill="var(--primary)" fontSize="11" fontFamily="monospace" className="font-semibold" opacity="0.8">233</text>
-                      <text x="300" y="135" fill="var(--primary)" fontSize="10" fontFamily="monospace" className="font-semibold" opacity="0.8">144</text>
-                      <text x="330" y="250" fill="var(--primary)" fontSize="9" fontFamily="monospace" className="font-semibold" opacity="0.8">89</text>
-                      <text x="258" y="270" fill="var(--primary)" fontSize="8" fontFamily="monospace" className="font-semibold" opacity="0.8">55</text>
-                      <text x="248" y="226" fill="var(--primary)" fontSize="7" fontFamily="monospace" className="font-semibold" opacity="0.8">34</text>
-                    </g>
-                  )}
-                  {goldenOverlay === "circles" && (
-                    <g>
-                      <circle cx="190" cy="180" r="170" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3" fill="none" opacity="0.7" />
-                      <circle cx="190" cy="180" r="105" stroke="var(--primary)" strokeWidth="1.2" strokeDasharray="3 3" fill="none" opacity="0.7" />
-                      <circle cx="190" cy="180" r="65" stroke="#E8A14B" strokeWidth="1.2" strokeDasharray="2 2" fill="none" opacity="0.8" />
-                    </g>
-                  )}
-                  {goldenOverlay === "grid" && (
-                    <g>
-                      <line x1="190" y1="0" x2="190" y2="360" stroke="var(--primary)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                      <line x1="0" y1="180" x2="380" y2="180" stroke="var(--primary)" strokeWidth="1" strokeDasharray="2 2" opacity="0.6" />
-                      <rect x="20" y="10" width="340" height="340" stroke="var(--primary)" strokeWidth="0.8" fill="none" opacity="0.4" />
-                      <circle cx="190" cy="180" r="170" stroke="var(--primary)" strokeWidth="0.8" fill="none" opacity="0.4" />
-                      <line x1="20" y1="10" x2="360" y2="350" stroke="var(--primary)" strokeWidth="0.8" opacity="0.4" />
-                      <line x1="360" y1="10" x2="20" y2="350" stroke="var(--primary)" strokeWidth="0.8" opacity="0.4" />
-                    </g>
-                  )}
-                </svg>
-              )}
             </div>
 
             <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground pt-4 border-t border-border">
@@ -1255,7 +1257,7 @@ function BrandBookRoute() {
       <Section id="paleta" eyebrow="03 · Paleta" title="Cor com hierarquia">
         <div>
           <p className="text-sm text-muted-foreground max-w-2xl">
-            A paleta é construída em três níveis. O verde Microsistec domina (60% do peso visual), apoiado por neutros silêncios e acentos quentes.
+            A paleta é construída em três níveis. A cor principal de {brand.name} domina (60% do peso visual), apoiada por tons neutros e acentos quentes.
           </p>
 
           <h3 className="mt-10 mb-4 text-xs font-mono uppercase tracking-widest text-primary">Primárias</h3>
@@ -1954,7 +1956,7 @@ function BrandBookRoute() {
                 {
                   title: "Símbolo Isolado",
                   desc: "Sem assinatura de texto",
-                  format: brand.logoUrl ? "PNG" : "SVG",
+                  format: (brand.symbolUrl || brand.logoUrl) ? "PNG" : "SVG",
                   variant: "original" as const,
                   withWordmark: false,
                   bg: "bg-muted/30 border-muted/50",
@@ -2002,9 +2004,28 @@ function BrandBookRoute() {
               <div>
                 <div className="w-10 h-10 rounded-lg bg-primary/10 grid place-items-center text-primary mb-4 font-mono font-bold text-xs">PDF</div>
                 <h5 className="text-sm font-semibold">Manual Completo</h5>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Gere a versão de impressão de alta fidelidade contendo todas as seções e diretrizes de identidade visual deste manual.
+                <p className="text-xs text-muted-foreground mt-1 font-sans">
+                  Gere a versão de impressão contendo todas as seções e diretrizes de identidade visual deste manual.
                 </p>
+                <div className="mt-4 space-y-2">
+                  <label className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground block">Orientação do PDF</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPrintOrientation('portrait')}
+                      className={`py-1.5 px-3 rounded-lg border text-xs font-semibold transition-all ${printOrientation === 'portrait' ? 'bg-primary border-primary text-primary-foreground font-semibold' : 'border-border bg-background text-foreground hover:bg-muted'}`}
+                    >
+                      Vertical (Retrato)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPrintOrientation('landscape')}
+                      className={`py-1.5 px-3 rounded-lg border text-xs font-semibold transition-all ${printOrientation === 'landscape' ? 'bg-primary border-primary text-primary-foreground font-semibold' : 'border-border bg-background text-foreground hover:bg-muted'}`}
+                    >
+                      Horizontal (Paisagem)
+                    </button>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -2292,11 +2313,10 @@ $ink: ${brand.palette.neutrals[3].hex};
                   </div>
                 </div>
               </div>
-
               {/* Basic Details */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Nome da Marca</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Nome da Marca <span className="text-red-500 font-semibold">*</span></label>
                   <input
                     type="text"
                     required
@@ -2307,15 +2327,33 @@ $ink: ${brand.palette.neutrals[3].hex};
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Apresentação / Descrição</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Apresentação / Descrição <span className="text-red-500 font-semibold">*</span></label>
                   <input
                     type="text"
+                    required
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="Descrição da marca"
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
                   />
                 </div>
+              </div>
+
+              {/* Custom Domain Input */}
+              <div>
+                <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">
+                  Domínio Personalizado <span className="text-[10px] text-muted-foreground font-sans lowercase font-normal">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={editCustomDomain}
+                  onChange={(e) => setEditCustomDomain(e.target.value)}
+                  placeholder="Ex: manual.minhamarca.com.br"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Insira o domínio para este manual. Aponte um CNAME de seu subdomínio para este portal para habilitar.
+                </p>
               </div>
 
               {/* Essence (Mission, Vision, Promise) */}
@@ -2480,6 +2518,36 @@ $ink: ${brand.palette.neutrals[3].hex};
   );
 }
 
+const compressSignaturePhoto = (base64Str: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(base64Str);
+          return;
+        }
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        canvas.width = 80;
+        canvas.height = 80;
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 80, 80);
+        const compressed = canvas.toDataURL("image/jpeg", 0.6);
+        resolve(compressed);
+      } catch {
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+    img.src = base64Str;
+  });
+};
+
 function EmailSignatureSection({ brand }: { brand: BrandData }) {
   const [name, setName] = useState("Jefferson Campos");
   const [role, setRole] = useState("Product designer");
@@ -2492,9 +2560,11 @@ function EmailSignatureSection({ brand }: { brand: BrandData }) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPhotoBase64(reader.result as string);
-      toast.success("Foto da assinatura carregada com sucesso!");
+    reader.onloadend = async () => {
+      toast.info("Processando e otimizando imagem...");
+      const compressed = await compressSignaturePhoto(reader.result as string);
+      setPhotoBase64(compressed);
+      toast.success("Foto da assinatura carregada e otimizada!");
     };
     reader.readAsDataURL(file);
   };

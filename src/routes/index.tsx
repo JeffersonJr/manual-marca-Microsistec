@@ -33,6 +33,7 @@ interface Brand {
   mission: string;
   vision: string;
   promise: string;
+  customDomain?: string;
   values: { name: string; description: string }[];
   palette: {
     primary: { name: string; hex: string; role: string; token: string }[];
@@ -41,6 +42,84 @@ interface Brand {
     neutrals: { name: string; hex: string }[];
   };
 }
+
+export const generateEssence = (name: string, presentation: string) => {
+  const cleanPres = presentation.trim().replace(/\.+$/, "");
+  const words = cleanPres.split(" ");
+  const firstFewWords = words.slice(0, 5).join(" ");
+  
+  const defaultMission = `Prover excelência e inovação através de ${cleanPres.toLowerCase()}, transformando a realidade de nossos clientes com compromisso e qualidade.`;
+  const defaultVision = `Tornar-se a referência no setor, sendo reconhecida pela liderança inovadora em ${firstFewWords.toLowerCase()} e impacto positivo.`;
+  const defaultPromise = `Entregar de forma consistente confiança, qualidade e evolução constante em todas as soluções de ${name}.`;
+  
+  return {
+    mission: defaultMission,
+    vision: defaultVision,
+    promise: defaultPromise
+  };
+};
+
+export const extractColorsFromImage = (base64Str: string): Promise<{ primary: string; secondary: string }> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve({ primary: "#2b5250", secondary: "#5aa6a6" });
+          return;
+        }
+        canvas.width = 30;
+        canvas.height = 30;
+        ctx.drawImage(img, 0, 0, 30, 30);
+        const imgData = ctx.getImageData(0, 0, 30, 30).data;
+        
+        const colorMap: Record<string, number> = {};
+        for (let i = 0; i < imgData.length; i += 4) {
+          const r = imgData[i];
+          const g = imgData[i+1];
+          const b = imgData[i+2];
+          const a = imgData[i+3];
+          if (a < 180) continue; 
+          const rgbSum = r + g + b;
+          if (rgbSum > 690 || rgbSum < 80) continue; // Skip white/black
+          
+          const qr = Math.round(r / 15) * 15;
+          const qg = Math.round(g / 15) * 15;
+          const qb = Math.round(b / 15) * 15;
+          const hex = "#" + [qr, qg, qb].map(x => {
+            const h = Math.max(0, Math.min(255, x)).toString(16);
+            return h.length === 1 ? "0" + h : h;
+          }).join("");
+          
+          colorMap[hex] = (colorMap[hex] || 0) + 1;
+        }
+        
+        const sortedColors = Object.entries(colorMap).sort((a, b) => b[1] - a[1]);
+        
+        let primary = "#2b5250";
+        let secondary = "#5aa6a6";
+        
+        if (sortedColors.length > 0) {
+          primary = sortedColors[0][0];
+        }
+        if (sortedColors.length > 1) {
+          secondary = sortedColors[1][0];
+        } else {
+          secondary = primary === "#2b5250" ? "#5aa6a6" : "#2b5250";
+        }
+        resolve({ primary, secondary });
+      } catch {
+        resolve({ primary: "#2b5250", secondary: "#5aa6a6" });
+      }
+    };
+    img.onerror = () => {
+      resolve({ primary: "#2b5250", secondary: "#5aa6a6" });
+    };
+    img.src = base64Str;
+  });
+};
 
 const defaultMicrosistec: Brand = {
   id: "microsistec",
@@ -96,6 +175,7 @@ function Dashboard() {
   const [primaryColor, setPrimaryColor] = useState("#4f46e5");
   const [secondaryColor, setSecondaryColor] = useState("#06b6d4");
   const [accentColor, setAccentColor] = useState("#f59e0b");
+  const [customDomain, setCustomDomain] = useState("");
 
   const serverBrandsRef = useRef<Brand[]>([]);
 
@@ -137,14 +217,38 @@ function Dashboard() {
       });
   }, [getMergedBrands]);
 
+  // Redirect to brand page if accessing via custom domain
+  useEffect(() => {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("bypass") === "true") return;
+
+    const matched = brands.find(b => b.customDomain && b.customDomain.toLowerCase().trim() === host.toLowerCase().trim());
+    if (matched) {
+      router.navigate({ to: "/brand/$brandId", params: { brandId: matched.id } });
+    }
+  }, [brands, router]);
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setLogoBase64(reader.result as string);
+    reader.onloadend = async () => {
+      const b64 = reader.result as string;
+      setLogoBase64(b64);
       toast.success("Logo carregada com sucesso!");
+      try {
+        toast.info("Analisando logotipo para extrair cores...");
+        const colors = await extractColorsFromImage(b64);
+        setPrimaryColor(colors.primary);
+        setSecondaryColor(colors.secondary);
+        toast.success("Cores primária e secundária detectadas e configuradas automaticamente!");
+      } catch (err) {
+        console.error("Erro ao extrair cores:", err);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -187,24 +291,39 @@ function Dashboard() {
 
   const handleCreateBrand = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!brandName) {
+    if (!brandName.trim()) {
       toast.error("Por favor, preencha o nome da marca.");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Por favor, preencha a Apresentação / Descrição da marca.");
+      return;
+    }
+    if (!logoBase64 || !logoReverseBase64 || !symbolBase64 || !symbolReverseBase64) {
+      toast.error("Por favor, envie todas as 4 variações de logo obrigatórias: Logotipo Completo, Logotipo Reverso, Símbolo Isolado e Símbolo Reverso.");
       return;
     }
 
     const newBrandId = brandName.toLowerCase().trim().replace(/\s+/g, "-");
 
+    // Generate mission/vision/promise if not provided
+    const essence = generateEssence(brandName, description);
+    const finalMission = mission.trim() || essence.mission;
+    const finalVision = vision.trim() || essence.vision;
+    const finalPromise = promise.trim() || essence.promise;
+
     const newBrand: Brand = {
       id: newBrandId,
       name: brandName,
-      description: description || `Manual de identidade visual e guia de estilo para a marca ${brandName}.`,
+      description: description,
       logoUrl: logoBase64 || undefined,
       symbolUrl: symbolBase64 || undefined,
       logoReverseUrl: logoReverseBase64 || undefined,
       symbolReverseUrl: symbolReverseBase64 || undefined,
-      mission: mission || "Facilitar a vida das pessoas por meio de inovação e excelência.",
-      vision: vision || `Ser referência no mercado de atuação de ${brandName}.`,
-      promise: promise || "Qualidade superior, comprometimento e evolução constante.",
+      mission: finalMission,
+      vision: finalVision,
+      promise: finalPromise,
+      customDomain: customDomain.trim() || undefined,
       values: [
         { name: "Inovação", description: "Busca constante por novas e melhores soluções." },
         { name: "Qualidade", description: "Entrega excelente em todas as etapas de trabalho." },
@@ -222,7 +341,7 @@ function Dashboard() {
           { name: "Dark Shade", hex: "#111827", role: "Profundidade e dark UI.", token: "--color-brand-dark" },
         ],
         accent: [
-          { name: `${brandName} Acento`, hex: accentColor, role: "Acento dinâmico para alertas e destaques.", token: "--color-brand-accent" },
+          { name: `${brandName} Acento`, hex: accentColor, role: "Acento dinâmico para alertas e destakes.", token: "--color-brand-accent" },
           { name: "Cream Background", hex: "#FDFBF7", role: "Fundo alternativo suave.", token: "--color-brand-cream" },
         ],
         neutrals: [
@@ -258,6 +377,7 @@ function Dashboard() {
     setMission("");
     setVision("");
     setPromise("");
+    setCustomDomain("");
 
     // Redirect to the newly created manual
     router.navigate({ to: `/brand/${newBrandId}` });
@@ -622,7 +742,7 @@ function Dashboard() {
               {/* Logo & Symbol Upload Row */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Logotipo Completo</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Logotipo Completo <span className="text-red-500 font-semibold">*</span></label>
                   <div className="border-2 border-dashed border-border/80 hover:border-primary/55 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-muted/20 relative min-h-[140px]">
                     {logoBase64 ? (
                       <div className="flex flex-col items-center">
@@ -652,7 +772,7 @@ function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Símbolo Isolado (Opcional)</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Símbolo Isolado (Ícone) <span className="text-red-500 font-semibold">*</span></label>
                   <div className="border-2 border-dashed border-border/80 hover:border-primary/55 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-muted/20 relative min-h-[140px]">
                     {symbolBase64 ? (
                       <div className="flex flex-col items-center">
@@ -685,7 +805,7 @@ function Dashboard() {
               {/* Logo & Symbol REVERSE Upload Row */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Logotipo Reverso (Para Fundo Escuro)</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Logotipo Reverso <span className="text-red-500 font-semibold">*</span></label>
                   <div className="border-2 border-dashed border-border/80 hover:border-primary/55 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-muted/20 relative min-h-[140px]">
                     {logoReverseBase64 ? (
                       <div className="flex flex-col items-center">
@@ -715,7 +835,7 @@ function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Símbolo Reverso (Opcional)</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-2">Símbolo Reverso (Ícone Reverso) <span className="text-red-500 font-semibold">*</span></label>
                   <div className="border-2 border-dashed border-border/80 hover:border-primary/55 rounded-2xl p-4 flex flex-col items-center justify-center text-center bg-muted/20 relative min-h-[140px]">
                     {symbolReverseBase64 ? (
                       <div className="flex flex-col items-center">
@@ -748,27 +868,46 @@ function Dashboard() {
               {/* Basic Details */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Nome da Marca</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Nome da Marca <span className="text-red-500 font-semibold">*</span></label>
                   <input
                     type="text"
                     required
                     value={brandName}
                     onChange={(e) => setBrandName(e.target.value)}
                     placeholder="Ex: Microsistec"
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Apresentação / Descrição</label>
+                  <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">Apresentação / Descrição <span className="text-red-500 font-semibold">*</span></label>
                   <input
                     type="text"
+                    required
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Ex: Tecnologia com precisão e clareza visual..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
                   />
                 </div>
               </div>
+
+              {/* Custom Domain Input */}
+              <div>
+                <label className="text-xs font-mono uppercase tracking-widest text-muted-foreground block mb-1.5">
+                  Domínio Personalizado <span className="text-[10px] text-muted-foreground font-sans lowercase font-normal">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={customDomain}
+                  onChange={(e) => setCustomDomain(e.target.value)}
+                  placeholder="Ex: manual.minhamarca.com.br"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:border-primary transition-colors text-foreground"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Insira o domínio para este manual. Aponte um CNAME de seu subdomínio para este portal para habilitar.
+                </p>
+              </div>
+
 
               {/* Essence (Mission, Vision, Promise) */}
               <div className="space-y-4">
