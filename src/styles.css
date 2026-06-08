@@ -75,6 +75,10 @@
 }
 
 @layer base {
+  html {
+    scroll-padding-top: 112px;
+    scroll-behavior: smooth;
+  }
   * { border-color: var(--color-border); }
   body {
     background-color: var(--color-background);

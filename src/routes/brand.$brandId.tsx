@@ -93,25 +93,13 @@ const defaultMicrosistec: BrandData = {
   },
 };
 
-function isColorDark(hex: string): boolean {
-  const cleanHex = hex.replace("#", "");
-  const r = parseInt(cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.substring(4, 6), 16);
-  if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq < 140; // less than 140 is dark, needs light text
-}
-
-function Swatch({ name, hex, role, token }: { name: string; hex: string; role?: string; token?: string; dark?: boolean }) {
+function Swatch({ name, hex, role, token, dark }: { name: string; hex: string; role?: string; token?: string; dark?: boolean }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(hex);
     toast.success(`Copiado: ${hex} (${name})`, {
       description: "Cor copiada para a área de transferência.",
     });
   };
-
-  const isDark = isColorDark(hex);
 
   return (
     <div
@@ -124,7 +112,7 @@ function Swatch({ name, hex, role, token }: { name: string; hex: string; role?: 
             Copiar HEX
           </span>
         </div>
-        <div className={`absolute bottom-3 left-3 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-md backdrop-blur-md border ${isDark ? "bg-black/35 text-white/90 border-white/10" : "bg-white/45 text-black/85 border-black/10"}`}>
+        <div className={`absolute bottom-3 left-3 text-[10px] tracking-widest uppercase font-mono ${dark ? "text-white/80" : "text-black/60"}`}>
           {hex}
         </div>
       </div>
@@ -147,7 +135,7 @@ function Section({ id, eyebrow, title, children }: { id: string; eyebrow: string
     <section id={id} className="border-t border-border py-16 md:py-28">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="grid md:grid-cols-[200px_1fr] gap-10 md:gap-16">
-          <div className="md:sticky md:top-24 md:self-start">
+          <div className="md:sticky md:top-28 md:self-start">
             <div className="text-[11px] tracking-[0.25em] uppercase text-primary font-mono">{eyebrow}</div>
             <h2 className="mt-3 text-2xl md:text-4xl font-semibold text-foreground">{title}</h2>
           </div>
@@ -986,9 +974,9 @@ function BrandBookRoute() {
       
       {/* Grid Overlay */}
       {gridMode && (
-        <div className="pointer-events-none fixed inset-0 z-50 max-w-6xl mx-auto px-6 w-full h-full flex justify-between gap-6 opacity-40">
+        <div className="pointer-events-none fixed inset-0 z-50 max-w-6xl mx-auto px-6 w-full h-full flex justify-between gap-6 opacity-35">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="flex-1 h-full bg-teal-500/15 border-x border-dashed border-teal-500/40" />
+            <div key={i} className="flex-1 h-full bg-teal-500/20 border-x border-dashed border-teal-500/50" />
           ))}
         </div>
       )}
@@ -1031,7 +1019,7 @@ function BrandBookRoute() {
         </div>
         
         {/* Navigation Menu Row */}
-        <div className="border-t border-border bg-background/50">
+        <div className="border-t border-border bg-background/50 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-11 flex items-center overflow-x-auto scrollbar-none">
             <nav className="flex items-center gap-6 text-[11px] font-mono uppercase tracking-wider text-muted-foreground whitespace-nowrap">
               <a href="#principios" className="hover:text-foreground transition-colors py-2">Princípios</a>
@@ -1050,10 +1038,13 @@ function BrandBookRoute() {
         </div>
       </header>
 
+      {/* Spacer for fixed header */}
+      <div className="h-[108px] no-print" />
+
       {/* HERO */}
       <section id="top" className="relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-60" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-36 pb-20 md:pt-48 md:pb-32">
+        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-20 md:pt-32 md:pb-32">
           <div className="text-[11px] tracking-[0.3em] uppercase text-primary font-mono mb-6">
             Manual de Marca · 2026
           </div>
