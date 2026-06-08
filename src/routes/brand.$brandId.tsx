@@ -895,13 +895,31 @@ function BrandBookRoute() {
             size: ${printOrientation};
             margin: 15mm;
           }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           header, footer, button, nav, .no-print, [role="tooltip"], .toaster, [id^="toast-"] {
             display: none !important;
           }
           body {
-            background: white !important;
-            color: black !important;
+            background: #ffffff !important;
+            color: #111827 !important;
             font-size: 12px !important;
+          }
+          h1, h2, h3, h4, h5, h6 {
+            color: #111827 !important;
+          }
+          p {
+            color: #374151 !important;
+          }
+          .text-muted-foreground {
+            color: #4b5563 !important;
+          }
+          .bg-card {
+            background-color: #f9fafb !important;
+            border-color: #e5e7eb !important;
           }
           main, .max-w-6xl {
             max-width: 100% !important;
@@ -909,9 +927,15 @@ function BrandBookRoute() {
             padding: 0 !important;
             margin: 0 !important;
           }
-          section {
+          section:not(#top) {
             page-break-before: always !important;
             break-before: page !important;
+          }
+          #top {
+            page-break-before: avoid !important;
+            break-before: avoid !important;
+          }
+          section {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             border-top: none !important;
@@ -920,14 +944,28 @@ function BrandBookRoute() {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
           }
-          h1, h2, h3, h4, h5, h6, p, span, div, td, strong, a {
-            color: #000000 !important;
+          section > div > .grid {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1.5rem !important;
           }
-          .grid, .flex {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+          section > div > .grid > div {
+            position: static !important;
           }
-          .rounded-xl, .rounded-2xl {
+          .grid {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+          }
+          .grid.grid-cols-2, 
+          .grid.sm\\:grid-cols-2, 
+          .grid.sm\\:grid-cols-4, 
+          .grid.lg\\:grid-cols-3 {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 1rem !important;
+          }
+          .card, .rounded-xl, .rounded-2xl, .p-6, blockquote, table, pre {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
