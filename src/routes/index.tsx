@@ -3,7 +3,7 @@
  */
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Plus, Settings, Palette, Eye, ArrowRight, ArrowLeft, Upload, X, Check } from "lucide-react";
+import { Plus, Settings, Palette, Eye, ArrowRight, ArrowLeft, Upload, X, Check, Download, FileUp } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { DynamicLogoMark } from "@/components/brand/DynamicLogoMark";
 
@@ -292,6 +292,70 @@ function Dashboard() {
 
   const [darkMode, setDarkMode] = useState(false);
 
+  // Export brand as JSON file
+  const handleExportBrand = (brand: Brand) => {
+    const exportData = { ...brand, _exportVersion: "1.0", _exportDate: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `manual-${brand.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Manual "${brand.name}" exportado com sucesso!`);
+  };
+
+  // Import brand from JSON file
+  const handleImportBrand = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+
+        // Validate required fields
+        if (!data.id || !data.name || !data.palette) {
+          toast.error("Arquivo inválido. Certifique-se de que é um manual exportado pelo sistema.");
+          return;
+        }
+
+        // Strip export metadata
+        const { _exportVersion, _exportDate, ...brandData } = data;
+
+        // Prevent overwriting the default Microsistec
+        if (brandData.id === "microsistec") {
+          toast.error("Não é possível importar um manual com o ID 'microsistec'.");
+          return;
+        }
+
+        const stored = localStorage.getItem("custom_brands");
+        let currentCustom: Brand[] = [];
+        if (stored) {
+          try { currentCustom = JSON.parse(stored); } catch { /* ignore */ }
+        }
+
+        const existingIndex = currentCustom.findIndex(b => b.id === brandData.id);
+        if (existingIndex >= 0) {
+          currentCustom[existingIndex] = brandData as Brand;
+        } else {
+          currentCustom.push(brandData as Brand);
+        }
+
+        localStorage.setItem("custom_brands", JSON.stringify(currentCustom));
+        setBrands([defaultMicrosistec, ...currentCustom]);
+        toast.success(`Manual "${brandData.name}" importado com sucesso!`);
+      } catch {
+        toast.error("Erro ao ler o arquivo. Verifique se é um JSON válido.");
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset input so re-importing the same file works
+    e.target.value = "";
+  };
+
   // Sync theme
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
@@ -354,6 +418,21 @@ function Dashboard() {
                 </svg>
               )}
             </button>
+
+            {/* Import */}
+            <label
+              className="inline-flex items-center gap-2 rounded-xl border border-border text-muted-foreground hover:bg-muted hover:text-foreground px-3 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer"
+              title="Importar manual (.json)"
+            >
+              <FileUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Importar</span>
+              <input
+                type="file"
+                accept=".json,application/json"
+                onChange={handleImportBrand}
+                className="hidden"
+              />
+            </label>
 
             <button
               onClick={() => setShowModal(true)}
@@ -442,7 +521,18 @@ function Dashboard() {
               </div>
 
               <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-between">
-                <span className="text-xs font-mono text-muted-foreground uppercase">Manual v1.0</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-muted-foreground uppercase">Manual v1.0</span>
+                  {brand.id !== "microsistec" && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleExportBrand(brand); }}
+                      className="p-1.5 rounded-lg border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
+                      title="Exportar manual como JSON"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
                 <Link
                   to="/brand/$brandId"
                   params={{ brandId: brand.id }}
