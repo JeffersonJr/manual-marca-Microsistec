@@ -361,7 +361,7 @@ function Dashboard() {
     localStorage.setItem("custom_brands", JSON.stringify(updated));
 
     // Persist to server (local custom-brands.json or KV store)
-    saveBrandServer(newBrand).catch((err: any) => {
+    saveBrandServer({ data: newBrand }).catch((err: any) => {
       console.error("Failed to sync new brand to server:", err);
     });
 
@@ -423,7 +423,7 @@ function Dashboard() {
       updated.splice(targetIndex, 0, removed);
 
       localStorage.setItem("custom_brands", JSON.stringify(updated));
-      saveAllBrandsServer(updated).catch((err: any) => {
+      saveAllBrandsServer({ data: updated }).catch((err: any) => {
         console.error("Failed to sync brand ordering to server:", err);
       });
 
@@ -494,7 +494,7 @@ function Dashboard() {
         localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== brandData.id)));
 
         localStorage.setItem("custom_brands", JSON.stringify(currentMerged));
-        saveAllBrandsServer(currentMerged).catch((err: any) => {
+        saveAllBrandsServer({ data: currentMerged }).catch((err: any) => {
           console.error("Failed to sync imported brand to server:", err);
         });
 
