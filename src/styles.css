@@ -89,9 +89,18 @@
 @layer utilities {
   .grid-bg {
     background-image:
-      linear-gradient(to right, color-mix(in oklch, var(--teal-deep) 7%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklch, var(--teal-deep) 7%, transparent) 1px, transparent 1px);
+      linear-gradient(to right, color-mix(in oklch, var(--teal-deep) 15%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklch, var(--teal-deep) 15%, transparent) 1px, transparent 1px);
     background-size: 56px 56px;
+    mask-image: radial-gradient(circle at 50% 35%, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 35%, black 20%, transparent 80%);
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -117,6 +126,19 @@
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes loading-wave-anim {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.2);
+  }
+}
+
+.animate-loading-wave {
+  animation: loading-wave-anim 1.6s ease-in-out infinite;
 }
 
 @media print {
