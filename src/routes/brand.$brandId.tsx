@@ -93,13 +93,25 @@ const defaultMicrosistec: BrandData = {
   },
 };
 
-function Swatch({ name, hex, role, token, dark }: { name: string; hex: string; role?: string; token?: string; dark?: boolean }) {
+function isColorDark(hex: string): boolean {
+  const cleanHex = hex.replace("#", "");
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq < 140; // less than 140 is dark, needs light text
+}
+
+function Swatch({ name, hex, role, token }: { name: string; hex: string; role?: string; token?: string; dark?: boolean }) {
   const handleCopy = () => {
     navigator.clipboard.writeText(hex);
     toast.success(`Copiado: ${hex} (${name})`, {
       description: "Cor copiada para a área de transferência.",
     });
   };
+
+  const isDark = isColorDark(hex);
 
   return (
     <div
@@ -112,7 +124,7 @@ function Swatch({ name, hex, role, token, dark }: { name: string; hex: string; r
             Copiar HEX
           </span>
         </div>
-        <div className={`absolute bottom-3 left-3 text-[10px] tracking-widest uppercase font-mono ${dark ? "text-white/80" : "text-black/60"}`}>
+        <div className={`absolute bottom-3 left-3 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-md backdrop-blur-md border ${isDark ? "bg-black/35 text-white/90 border-white/10" : "bg-white/45 text-black/85 border-black/10"}`}>
           {hex}
         </div>
       </div>
@@ -974,15 +986,15 @@ function BrandBookRoute() {
       
       {/* Grid Overlay */}
       {gridMode && (
-        <div className="pointer-events-none fixed inset-0 z-50 max-w-6xl mx-auto px-6 w-full h-full flex justify-between gap-6 opacity-15">
+        <div className="pointer-events-none fixed inset-0 z-50 max-w-6xl mx-auto px-6 w-full h-full flex justify-between gap-6 opacity-40">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="flex-1 h-full bg-teal-500/10 border-x border-dashed border-teal-500/30" />
+            <div key={i} className="flex-1 h-full bg-teal-500/15 border-x border-dashed border-teal-500/40" />
           ))}
         </div>
       )}
 
       {/* NAV */}
-      <header className="sticky top-0 z-40 backdrop-blur-md bg-background/80 border-b border-border transition-colors duration-300">
+      <header className="fixed top-0 left-0 right-0 z-40 backdrop-blur-md bg-background/80 border-b border-border transition-colors duration-300">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link to="/" className="p-2 rounded-lg border border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-300 shrink-0" title="Voltar ao Painel">
@@ -1041,7 +1053,7 @@ function BrandBookRoute() {
       {/* HERO */}
       <section id="top" className="relative overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-60" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-20 md:pt-32 md:pb-32">
+        <div className="relative max-w-6xl mx-auto px-6 pt-36 pb-20 md:pt-48 md:pb-32">
           <div className="text-[11px] tracking-[0.3em] uppercase text-primary font-mono mb-6">
             Manual de Marca · 2026
           </div>
