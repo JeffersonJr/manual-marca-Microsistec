@@ -159,7 +159,7 @@ function LogoCard({ logoUrl, symbolUrl, logoReverseUrl, symbolReverseUrl, brandN
   return (
     <div className="rounded-xl border border-border overflow-hidden bg-card">
       <div className="h-44 grid place-items-center p-8" style={{ background: bg }}>
-        <DynamicLogoMark logoUrl={logoUrl} symbolUrl={symbolUrl} logoReverseUrl={logoReverseUrl} symbolReverseUrl={symbolReverseUrl} brandName={brandName} variant={variant} className="w-full max-w-[280px] max-h-24 object-contain" />
+        <DynamicLogoMark logoUrl={logoUrl} symbolUrl={symbolUrl} logoReverseUrl={logoReverseUrl} symbolReverseUrl={symbolReverseUrl} brandName={brandName} variant={variant} className="w-full max-w-[280px] h-24" />
       </div>
       <div className="p-4 border-t border-border">
         <div className="text-sm font-semibold">{label}</div>
@@ -1073,7 +1073,7 @@ function BrandBookRoute() {
         <div>
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
             <div className="aspect-[16/7] flex items-center justify-center p-6 md:p-16 bg-[var(--cream)] relative overflow-hidden">
-              <DynamicLogoMark logoUrl={brand.logoUrl} symbolUrl={brand.symbolUrl} logoReverseUrl={brand.logoReverseUrl} symbolReverseUrl={brand.symbolReverseUrl} brandName={brand.name} variant="original" className="w-full max-w-2xl max-h-40" />
+              <DynamicLogoMark logoUrl={brand.logoUrl} symbolUrl={brand.symbolUrl} logoReverseUrl={brand.logoReverseUrl} symbolReverseUrl={brand.symbolReverseUrl} brandName={brand.name} variant="original" className="w-full max-w-2xl h-40" />
             </div>
             <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
               <Meta k="Construção" v="Wordmark + símbolo geométrico baseado em dois 'M' espelhados." />
@@ -1096,7 +1096,7 @@ function BrandBookRoute() {
             <div className="relative mx-auto" style={{ maxWidth: 720 }}>
               <div className="relative p-[12%] outline-dashed outline-1 outline-primary/40 rounded">
                 <div className="relative outline-dashed outline-1 outline-primary/40 flex justify-center items-center py-8">
-                  <DynamicLogoMark logoUrl={brand.logoUrl} symbolUrl={brand.symbolUrl} logoReverseUrl={brand.logoReverseUrl} symbolReverseUrl={brand.symbolReverseUrl} brandName={brand.name} variant="original" className="w-full max-w-[240px] max-h-24 object-contain" />
+                  <DynamicLogoMark logoUrl={brand.logoUrl} symbolUrl={brand.symbolUrl} logoReverseUrl={brand.logoReverseUrl} symbolReverseUrl={brand.symbolReverseUrl} brandName={brand.name} variant="original" className="w-full max-w-[240px] h-24" />
                   {/* X marks */}
                   <span className="absolute -top-3 -left-3 w-6 h-6 grid place-items-center text-xs text-primary font-mono">×</span>
                   <span className="absolute -top-3 -right-3 w-6 h-6 grid place-items-center text-xs text-primary font-mono">×</span>
@@ -1955,7 +1955,7 @@ function BrandBookRoute() {
                       brandName={brand.name}
                       variant={item.variant}
                       withWordmark={item.withWordmark}
-                      className="max-h-12 w-auto object-contain"
+                      className="h-12 w-auto"
                     />
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">
