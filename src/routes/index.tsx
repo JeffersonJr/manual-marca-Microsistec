@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, Settings, Palette, Eye, ArrowRight, ArrowLeft, Upload, X, Check, Download, FileUp, CloudUpload } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { DynamicLogoMark } from "@/components/brand/DynamicLogoMark";
+import { loadBrandsServer, saveBrandServer, saveAllBrandsServer } from "@/lib/api/brands.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -203,14 +204,14 @@ function Dashboard() {
 
   // Load brands from server + localStorage
   useEffect(() => {
-    fetch("/custom-brands.json")
-      .then(r => r.ok ? r.json() : [])
+    loadBrandsServer()
       .then((serverBrands: Brand[]) => {
         serverBrandsRef.current = serverBrands;
         const merged = getMergedBrands();
         setBrands([defaultMicrosistec, ...merged]);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Failed to load brands from server:", err);
         // Fallback to localStorage only
         const merged = getMergedBrands();
         setBrands([defaultMicrosistec, ...merged]);
@@ -359,6 +360,11 @@ function Dashboard() {
     const updated = [...filtered, newBrand];
     localStorage.setItem("custom_brands", JSON.stringify(updated));
 
+    // Persist to server (local custom-brands.json or KV store)
+    saveBrandServer(newBrand).catch(err => {
+      console.error("Failed to sync new brand to server:", err);
+    });
+
     // Remove from deleted list if it was previously deleted
     const deletedIds: string[] = JSON.parse(localStorage.getItem("deleted_brand_ids") || "[]");
     localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== newBrandId)));
@@ -417,6 +423,10 @@ function Dashboard() {
       updated.splice(targetIndex, 0, removed);
 
       localStorage.setItem("custom_brands", JSON.stringify(updated));
+      saveAllBrandsServer(updated).catch(err => {
+        console.error("Failed to sync brand ordering to server:", err);
+      });
+
       setBrands([defaultMicrosistec, ...updated]);
       toast.success("Ordem dos manuais atualizada!");
     } catch (err) {
@@ -484,6 +494,10 @@ function Dashboard() {
         localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== brandData.id)));
 
         localStorage.setItem("custom_brands", JSON.stringify(currentMerged));
+        saveAllBrandsServer(currentMerged).catch(err => {
+          console.error("Failed to sync imported brand to server:", err);
+        });
+
         setBrands([defaultMicrosistec, ...currentMerged]);
         toast.success(`Manual "${brandData.name}" importado com sucesso!`);
       } catch {

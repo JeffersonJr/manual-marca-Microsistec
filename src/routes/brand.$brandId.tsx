@@ -3,6 +3,7 @@
  */
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { DynamicLogoMark } from "@/components/brand/DynamicLogoMark";
+import { saveBrandServer, deleteBrandServer } from "@/lib/api/brands.functions";
 import { LogoMark } from "@/components/brand/LogoMark";
 import { useState, useEffect } from "react";
 import { toast, Toaster } from "sonner";
@@ -664,6 +665,11 @@ function BrandBookRoute() {
         localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds));
       }
 
+      // Sync deletion with server
+      deleteBrandServer({ id: brand.id }).catch(err => {
+        console.error("Failed to delete brand from server:", err);
+      });
+
       toast.success("Manual de Marca excluído com sucesso!");
       setShowDeleteModal(false);
       setShowEditModal(false);
@@ -791,6 +797,11 @@ function BrandBookRoute() {
        updatedBrands = [...currentBrands, updatedBrand];
      }
      localStorage.setItem("custom_brands", JSON.stringify(updatedBrands));
+
+      // Sync modifications to the server
+      saveBrandServer(updatedBrand).catch(err => {
+        console.error("Failed to sync updated brand to server:", err);
+      });
 
     setBrand(updatedBrand);
     toast.success("Manual de Marca atualizado com sucesso!");
