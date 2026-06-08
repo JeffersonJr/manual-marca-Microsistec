@@ -152,12 +152,16 @@ export function DynamicLogoMark({
 
   if (isMicrosistec) {
     const logoElement = (
-      <LogoMark
-        variant={variant === "reverse" ? "mono-light" : variant}
-        withWordmark={withWordmark}
-        className="w-full h-full object-contain"
+      <div 
+        className="w-full h-full"
         style={{ opacity: goldenOverlay !== "none" ? 0.22 : 1 }}
-      />
+      >
+        <LogoMark
+          variant={variant === "reverse" ? "mono-light" : variant}
+          withWordmark={withWordmark}
+          className="w-full h-full object-contain"
+        />
+      </div>
     );
     if (goldenOverlay !== "none") {
       return (
