@@ -361,7 +361,7 @@ function Dashboard() {
     localStorage.setItem("custom_brands", JSON.stringify(updated));
 
     // Persist to server (local custom-brands.json or KV store)
-    saveBrandServer(newBrand).catch(err => {
+    saveBrandServer(newBrand).catch((err: any) => {
       console.error("Failed to sync new brand to server:", err);
     });
 
@@ -423,7 +423,7 @@ function Dashboard() {
       updated.splice(targetIndex, 0, removed);
 
       localStorage.setItem("custom_brands", JSON.stringify(updated));
-      saveAllBrandsServer(updated).catch(err => {
+      saveAllBrandsServer(updated).catch((err: any) => {
         console.error("Failed to sync brand ordering to server:", err);
       });
 
@@ -494,7 +494,7 @@ function Dashboard() {
         localStorage.setItem("deleted_brand_ids", JSON.stringify(deletedIds.filter(id => id !== brandData.id)));
 
         localStorage.setItem("custom_brands", JSON.stringify(currentMerged));
-        saveAllBrandsServer(currentMerged).catch(err => {
+        saveAllBrandsServer(currentMerged).catch((err: any) => {
           console.error("Failed to sync imported brand to server:", err);
         });
 
@@ -510,18 +510,7 @@ function Dashboard() {
     e.target.value = "";
   };
 
-  // Download current merged brands as custom-brands.json for deployment
-  const handleSyncForDeploy = () => {
-    const merged = getMergedBrands();
-    const blob = new Blob([JSON.stringify(merged, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "custom-brands.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Arquivo baixado! Substitua public/custom-brands.json, commit e deploy.", { duration: 6000 });
-  };
+
 
   // Sync theme
   useEffect(() => {
@@ -601,15 +590,7 @@ function Dashboard() {
               />
             </label>
 
-            {/* Sync for Deploy */}
-            <button
-              onClick={handleSyncForDeploy}
-              className="inline-flex items-center gap-2 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 px-3 py-2.5 text-sm font-medium transition-all duration-300"
-              title="Baixar custom-brands.json para deploy permanente"
-            >
-              <CloudUpload className="w-4 h-4" />
-              <span className="hidden sm:inline">Sincronizar</span>
-            </button>
+
 
             <button
               onClick={() => setShowModal(true)}

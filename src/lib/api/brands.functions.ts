@@ -116,9 +116,9 @@ export const loadBrandsServer = createServerFn({ method: "GET" })
 
 // Server function to save a brand (add or update)
 export const saveBrandServer = createServerFn({ method: "POST" })
-  .input(z.any())
-  .handler(async ({ input }) => {
-    const brand = input;
+  .validator(z.any())
+  .handler(async ({ data }) => {
+    const brand = data;
     if (!brand || !brand.id) {
       throw new Error("Invalid brand data");
     }
@@ -154,9 +154,9 @@ export const saveBrandServer = createServerFn({ method: "POST" })
 
 // Server function to delete a brand
 export const deleteBrandServer = createServerFn({ method: "POST" })
-  .input(z.object({ id: z.string() }))
-  .handler(async ({ input }) => {
-    const { id } = input;
+  .validator(z.object({ id: z.string() }))
+  .handler(async ({ data }) => {
+    const { id } = data;
     
     // Load remote brands, filter and save
     let remoteBrands = await readRemoteBrands() || [];
@@ -177,9 +177,9 @@ export const deleteBrandServer = createServerFn({ method: "POST" })
 
 // Server function to save all brands (overwrite list - useful for sorting or imports)
 export const saveAllBrandsServer = createServerFn({ method: "POST" })
-  .input(z.array(z.any()))
-  .handler(async ({ input }) => {
-    const brands = input;
+  .validator(z.array(z.any()))
+  .handler(async ({ data }) => {
+    const brands = data;
     
     // Save remote
     await writeRemoteBrands(brands);

@@ -277,7 +277,7 @@ export function DynamicLogoMark({
     <img
       src={imgToRender}
       alt={`${brandName} Logo`}
-      className="w-full h-full object-contain"
+      className="h-full w-auto max-h-full object-contain"
       style={{ 
         filter: filterStyle || undefined,
         opacity: goldenOverlay !== "none" ? 0.22 : 1

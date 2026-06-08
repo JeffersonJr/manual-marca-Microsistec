@@ -666,7 +666,7 @@ function BrandBookRoute() {
       }
 
       // Sync deletion with server
-      deleteBrandServer({ id: brand.id }).catch(err => {
+      deleteBrandServer({ id: brand.id }).catch((err: any) => {
         console.error("Failed to delete brand from server:", err);
       });
 
@@ -799,7 +799,7 @@ function BrandBookRoute() {
      localStorage.setItem("custom_brands", JSON.stringify(updatedBrands));
 
       // Sync modifications to the server
-      saveBrandServer(updatedBrand).catch(err => {
+      saveBrandServer(updatedBrand).catch((err: any) => {
         console.error("Failed to sync updated brand to server:", err);
       });
 
